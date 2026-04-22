@@ -1,0 +1,17 @@
+{
+  "posts": [
+    {
+      "id": "01jwelcome001",
+      "slug": "welcome",
+      "title": "Welcome to Beyond Limits",
+      "subtitle": "A new home for my writings, services, and the 40-day journey. Thank you for being here.",
+      "category": "Welcome",
+      "bodyHtml": "<p>Hello, beautiful soul. My name is Romana — Anuradha. I'm so happy you're reading this.</p><p>For a long time my work has lived in different places — on my blog at <a href=\"https://anuradha.blog\" target=\"_blank\" rel=\"noopener\">anuradha.blog</a>, on Instagram, in conversations, in retreats. This site, <strong>Beyond Limits</strong>, is my attempt to bring it all together.</p><h2>Why &quot;Beyond Limits&quot;</h2><p>The name carries the whole story. Beyond the limits we were given as children. Beyond the limits society places on identity, on gender, on who is allowed to seek the divine.</p><blockquote>Love is not what you want, but who you are.</blockquote><p>My older writings also live on at <a href=\"https://anuradha.blog\" target=\"_blank\" rel=\"noopener\">anuradha.blog</a> — I’ll keep posting there too. This space will hold my newest thoughts as Beyond Limits grows.</p><p><em>With love,<br>Romana Anuradha</em> 🍀</p>",
+      "heroImage": "https://anuradha.blog/wp-content/uploads/2025/07/photo_2025-07-29_15-42-17.jpg",
+      "gallery": [],
+      "published": true,
+      "createdAt": "2026-04-21T10:00:00.000Z",
+      "updatedAt": "2026-04-21T10:00:00.000Z"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — administrace | Beyond Limits</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+  <meta name="robots" content="noindex, nofollow" />
+</head>
+<body class="admin-page">
+  <div class="admin-wrap">
+    <div class="admin-head">
+      <h1>Blog — administrace</h1>
+      <div class="admin-actions" id="adminTopActions"></div>
+    </div>
+
+    <div id="loginView" class="admin-login">
+      <h2>Přihlášení</h2>
+      <p class="admin-hint">Heslo nastavte v souboru <code>.env</code> (viz návod v BLOG-ADMIN.md).</p>
+      <p class="admin-error" id="loginError">Špatné heslo.</p>
+      <form id="loginForm">
+        <label for="loginPassword" class="admin-hint" style="display: block; margin-bottom: 0.35rem">Heslo</label>
+        <input type="password" name="password" id="loginPassword" autocomplete="current-password" required />
+        <button type="submit">Přihlásit se</button>
+      </form>
+    </div>
+
+    <div id="editorView" class="admin-hidden">
+      <div class="admin-panels">
+        <aside class="admin-list" aria-label="Seznam článků">
+          <h2>Články</h2>
+          <div id="postList"></div>
+          <button type="button" class="admin-btn admin-btn-ok" id="newPost" style="width: 100%; margin-top: 0.75rem">+ Nový článek</button>
+        </aside>
+
+        <div class="admin-editor">
+          <div class="admin-field">
+            <label for="fTitle">Titulek</label>
+            <input type="text" id="fTitle" name="title" required />
+          </div>
+          <div class="admin-field">
+            <label for="fSubtitle">Podtitulek (lead)</label>
+            <input type="text" id="fSubtitle" name="subtitle" />
+          </div>
+          <div class="admin-field">
+            <label for="fCategory">Rubrika (např. Welcome, Cesta, Meditace)</label>
+            <input type="text" id="fCategory" name="category" value="Journal" />
+          </div>
+          <div class="admin-field">
+            <label for="fSlug">URL slug (měnit jen pokud víte, proč — jinak se dopočítá z titulku)</label>
+            <input type="text" id="fSlug" name="slug" placeholder="např. moje-cesta-do-" />
+          </div>
+          <div class="admin-field">
+            <span class="label">Úvodní fotka (náhled u článku i v seznamu)</span>
+            <div class="admin-images">
+              <input type="file" id="heroFile" accept="image/*" />
+              <img id="heroPreview" class="admin-preview admin-hidden" alt="" />
+            </div>
+            <input type="hidden" id="fHero" />
+          </div>
+          <div class="admin-field">
+            <span class="label">Galerie (cestování) — můžete nahrát více fotek</span>
+            <input type="file" id="galleryFiles" accept="image/*" multiple />
+            <div class="admin-gallery" id="galleryThumbs" aria-live="polite"></div>
+            <p class="admin-hint">Fotky se ukládají na tento web; do textu můžete vkládat další snímky tlačítkem &quot;Obrázek v textu&quot;.</p>
+          </div>
+          <div class="admin-field">
+            <span class="label">Text článku</span>
+            <div class="admin-toolbar" role="toolbar" aria-label="Formátování">
+              <button type="button" data-cmd="bold" title="Tučné"><strong>B</strong></button>
+              <button type="button" data-cmd="italic" title="Kurzíva">I</button>
+              <button type="button" data-cmd="formatBlock" data-val="p" title="Odstavec">P</button>
+              <button type="button" data-cmd="formatBlock" data-val="h2" title="Nadpis 2">H2</button>
+              <button type="button" id="btnLink" title="Odkaz">Odkaz</button>
+              <button type="button" id="btnImgBody" title="Nahrát obrázek do textu">Obrázek v textu</button>
+            </div>
+            <div id="bodyEditor" class="prose" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
+            <input type="file" id="bodyImgFile" class="admin-hidden" accept="image/*" />
+          </div>
+          <div class="admin-row">
+            <label class="admin-check">
+              <input type="checkbox" id="fPublished" checked />
+              Publikované (viditelné na blogu)
+            </label>
+          </div>
+          <div class="admin-row" style="margin-top: 1rem">
+            <button type="button" class="admin-btn" id="savePost">Uložit</button>
+            <button type="button" class="admin-btn admin-btn-ghost" id="deletePost">Smazat</button>
+            <a class="admin-btn admin-btn-ghost" id="viewPublic" href="#" target="_blank" rel="noopener">Náhled</a>
+          </div>
+          <p class="admin-hint" id="saveStatus" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

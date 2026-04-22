@@ -1,0 +1,16 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/blog/:slug", "destination": "/post.html" },
+    { "source": "/cs/blog/:slug", "destination": "/cs/post.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.(css|js|svg|png|jpg|jpeg|webp)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

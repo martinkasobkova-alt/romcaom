@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     BLOG POST TEMPLATE
+     ============================================================
+     How to add a new blog post:
+     1. Copy this file: cp _template.html my-new-post.html
+     2. Edit the title, meta, date, and content (look for HHHHH)
+     3. Add a card to /blog.html linking to /blog/my-new-post.html
+     4. Done!
+     ============================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- HHHHH EDIT: Title and description HHHHH -->
+<title>Your post title here | Blog</title>
+<meta name="description" content="Short summary of the post (1-2 sentences) for search engines and social sharing.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body data-page="blog">
+
+<div id="nav-slot"></div>
+
+<!-- POST HEADER -->
+<section class="post-hero">
+  <div class="container">
+    <a href="/blog.html" class="post-back">← Back to all posts</a>
+
+    <!-- HHHHH EDIT: Date · Category · Author HHHHH -->
+    <div class="post-meta">Month Day, Year · Category · Anuradha</div>
+
+    <!-- HHHHH EDIT: Headline HHHHH -->
+    <h1>Your post title here</h1>
+
+    <!-- HHHHH EDIT: One-sentence lead (optional but nice) HHHHH -->
+    <p class="post-hero-lead">A short, evocative line that draws the reader in.</p>
+  </div>
+</section>
+
+<!-- POST BODY -->
+<section class="post-body reveal">
+  <div class="container">
+    <div class="prose">
+
+      <!-- HHHHH EDIT: Write your post here HHHHH -->
+
+      <p>
+        Open with something personal or a question. Talk to the reader the way you would talk to a friend.
+      </p>
+
+      <p>
+        Each paragraph is wrapped in &lt;p&gt; ... &lt;/p&gt; tags.
+      </p>
+
+      <h2>Use h2 for section headings</h2>
+
+      <p>
+        And keep going. Write as much or as little as you like.
+      </p>
+
+      <blockquote>
+        For an emphasized quote, use blockquote tags.
+      </blockquote>
+
+      <p>
+        For a list of points:
+      </p>
+
+      <ul>
+        <li>First item</li>
+        <li>Second item</li>
+        <li>Third item</li>
+      </ul>
+
+      <p>
+        For a link to another page: <a href="https://example.com" target="_blank" rel="noopener">like this</a>.
+      </p>
+
+      <p>
+        For <strong>bold</strong> or <em>italic</em> text, wrap a word in those tags.
+      </p>
+
+      <!-- HHHHH End of editable area HHHHH -->
+
+      <p style="font-family: var(--font-display); font-style: italic; font-size: 1.15rem; margin-top: 2rem;">
+        With love,<br>
+        Romana Anuradha 🍀
+      </p>
+
+      <hr style="border: none; border-top: 1px solid rgba(43,35,64,0.1); margin: 3rem 0 2rem;">
+
+      <p style="font-size: 0.9rem; color: var(--color-ink-soft); text-align: center;">
+        <a href="/blog.html" style="border-bottom: 1.5px solid var(--color-lime-bright); padding-bottom: 1px;">← Back to all posts</a>
+      </p>
+
+    </div>
+  </div>
+</section>
+
+<section class="newsletter-inline reveal">
+  <div class="container">
+    <div class="newsletter-inline-inner">
+      <h3>Stay in touch</h3>
+      <p>Subscribe to receive new writings and reflections.</p>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Your email" required>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div id="footer-slot"></div>
+<script src="../script.js"></script>
+</body>
+</html>
