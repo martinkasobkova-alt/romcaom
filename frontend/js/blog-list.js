@@ -99,13 +99,13 @@ function singlePost(post) {
       </div>`
     : "";
   return `
-    <article style="grid-column:1/-1; max-width: 820px; margin: 0 auto; padding: 0 .5rem;">
+    <article class="single-post">
       <p><a href="${blogPagePath}">${backLabel}</a></p>
       ${hero}
       <div class="blog-meta">${esc(date || "—")} · ${esc(post.category || (isCs ? "Deník" : "Journal"))}</div>
-      <h2 style="margin-top:.35rem">${esc(post.title || "")}</h2>
-      ${post.subtitle ? `<p style="opacity:.85">${esc(post.subtitle)}</p>` : ""}
-      <div class="prose">${post.bodyHtml || ""}</div>
+      <h2 class="single-post-title">${esc(post.title || "")}</h2>
+      ${post.subtitle ? `<p class="single-post-subtitle">${esc(post.subtitle)}</p>` : ""}
+      <div class="prose single-post-body">${post.bodyHtml || ""}</div>
       ${gallery}
     </article>`;
 }

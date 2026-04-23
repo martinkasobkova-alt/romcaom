@@ -1810,6 +1810,33 @@ html.is-ready .page-hero .container > * {
   text-align: left;
 }
 
+/* ============================================
+   Single blog post detail (rendered by js/blog-list.js)
+   ============================================ */
+
+.single-post {
+  grid-column: 1 / -1;
+  max-width: min(var(--prose-max-ch), 42rem);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.single-post-title {
+  margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+}
+
+.single-post-subtitle {
+  opacity: 0.85;
+  margin-bottom: 1.75rem;
+}
+
+.single-post-body {
+  max-width: 100%;
+  margin: 0;
+}
+
 .prose h2 {
   margin-top: 3rem;
   margin-bottom: 1rem;
