@@ -139,16 +139,23 @@ function timingSafeStringEqual(a, b) {
 async function verifyPassword(plain) {
   const saved = await readAuthFile();
   if (saved) {
-    return bcrypt.compare(plain, saved.passwordHash);
+    const ok = await bcrypt.compare(plain, saved.passwordHash);
+    console.log(`[auth] verify via auth.json → ${ok ? "OK" : "FAIL"}`);
+    return ok;
   }
   const hash = process.env.ADMIN_PASSWORD_HASH;
   if (hash) {
-    return bcrypt.compare(plain, hash);
+    const ok = await bcrypt.compare(plain, hash);
+    console.log(`[auth] verify via ADMIN_PASSWORD_HASH env → ${ok ? "OK" : "FAIL"}`);
+    return ok;
   }
   const plainEnv = process.env.ADMIN_PASSWORD;
   if (plainEnv) {
-    return timingSafeStringEqual(plain, plainEnv);
+    const ok = timingSafeStringEqual(plain, plainEnv);
+    console.log(`[auth] verify via ADMIN_PASSWORD env (plain) → ${ok ? "OK" : "FAIL"}`);
+    return ok;
   }
+  console.log("[auth] verify: no credentials configured");
   return false;
 }
 
@@ -265,15 +272,17 @@ app.post("/api/auth/change-password", authRequired, async (req, res) => {
   }
   const ok = await verifyPassword(currentPassword);
   if (!ok) {
+    console.warn("[change-password] wrong current password");
     return res.status(401).json({ error: "Current password is incorrect" });
   }
   try {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await writeAuthFile({ passwordHash, updatedAt: new Date().toISOString() });
+    console.log(`[change-password] saved to ${AUTH_FILE}`);
     res.json({ ok: true });
   } catch (err) {
-    console.error("[change-password] failed:", err);
-    res.status(500).json({ error: "Failed to save new password" });
+    console.error(`[change-password] write failed at ${AUTH_FILE}:`, err);
+    res.status(500).json({ error: `Failed to save new password: ${err?.message || err}` });
   }
 });
 
@@ -476,7 +485,10 @@ const port = Number(process.env.PORT) || 3000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
   console.log(`[storage] posts file: ${DATA}`);
+  console.log(`[storage] auth file: ${AUTH_FILE} (exists: ${existsSync(AUTH_FILE)})`);
   console.log(`[storage] media: ${hasCloudinary ? "Cloudinary (CLOUDINARY_URL set)" : `local dir ${UPLOADS}`}`);
+  const envAuth = process.env.ADMIN_PASSWORD_HASH ? "ADMIN_PASSWORD_HASH" : (process.env.ADMIN_PASSWORD ? "ADMIN_PASSWORD (plain)" : "none");
+  console.log(`[auth] env credentials: ${envAuth}  |  file credentials: ${existsSync(AUTH_FILE) ? "yes" : "no"}`);
   if (!existsSync(FRONTEND)) {
     console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
   }
