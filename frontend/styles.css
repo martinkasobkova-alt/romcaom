@@ -1011,7 +1011,7 @@ html.is-ready .hero-bleed__panel {
 
 .why-panel__list li {
   position: relative;
-  padding-left: 1.35rem;
+  padding-left: 1.65rem;
   margin-bottom: 0.65rem;
   font-size: 0.96rem;
   line-height: 1.55;
@@ -1020,15 +1020,15 @@ html.is-ready .hero-bleed__panel {
 }
 
 .why-panel__list li::before {
-  content: "";
+  content: "✦";
   position: absolute;
   left: 0;
-  top: 0.55em;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-ink);
-  opacity: 0.4;
+  top: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+  opacity: 0.85;
 }
 
 
