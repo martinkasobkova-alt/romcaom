@@ -129,7 +129,7 @@ function newPost() {
   el("viewPublic").removeAttribute("href");
   updateViewLink();
   renderList();
-  saveStatus.textContent = "Nový článek — po uložení vznikne adresa /blog/…";
+  saveStatus.textContent = "Nový článek — veřejná adresa: /blog/slug nebo /blog.html?slug=…";
 }
 
 function updateHeroPreview() {
@@ -150,7 +150,7 @@ function updateViewLink() {
   }
   const slug = fSlug.value.trim() || (fTitle.value ? slugify(fTitle.value) : "");
   if (slug) {
-    viewPublic.href = `${location.origin}/blog.html?slug=${encodeURIComponent(slug)}`;
+    viewPublic.href = `${location.origin}/blog/${encodeURIComponent(slug)}`;
   } else {
     viewPublic.removeAttribute("href");
   }

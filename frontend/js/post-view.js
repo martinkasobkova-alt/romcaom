@@ -36,6 +36,10 @@ const L = isCs
     };
 
 function getSlug() {
+  const q = new URLSearchParams(location.search).get("slug");
+  if (q != null && String(q).trim() !== "") {
+    return decodeURIComponent(String(q).trim());
+  }
   const p = location.pathname;
   if (p.startsWith("/cs/blog/")) {
     return decodeURIComponent(p.replace(/^\/cs\/blog\//, "").split("/")[0] || "");
@@ -43,7 +47,7 @@ function getSlug() {
   if (p.startsWith("/blog/")) {
     return decodeURIComponent(p.replace(/^\/blog\//, "").split("/")[0] || "");
   }
-  return new URLSearchParams(location.search).get("slug") || "";
+  return "";
 }
 
 function formatDate(iso) {
