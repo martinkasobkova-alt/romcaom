@@ -1559,6 +1559,7 @@ html.is-ready .hero-bleed__panel {
 
 .footer-tagline {
   margin: 0.45rem 0 0;
+  padding-left: 1.3rem;
   font-family: var(--font-display);
   font-size: 0.82rem;
   font-style: italic;
