@@ -10,26 +10,58 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { randomUUID } from "crypto";
 import { v2 as cloudinary } from "cloudinary";
+import { MongoClient } from "mongodb";
 
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), ".env") });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * Persistent storage paths.
+ * Perzistentní úložiště.
  *
- * Na produkci (Render) je připnutý disk na `/var/data` a env proměnné
- * `DATA_DIR` + `UPLOADS_DIR` ukazují na tento disk, takže články i nahrané
- * soubory přežívají redeploye.
+ * Pokud je v env `MONGODB_URI` (resp. `MONGO_URL` / `DATABASE_URL`), články
+ * i admin heslo se ukládají do MongoDB → přežívají redeploye, stačí jeden
+ * online DB cluster (např. MongoDB Atlas).
  *
- * Lokálně (bez env) se používá klasická složka uvnitř repozitáře, aby šlo
- * v klidu vyvíjet i bez nastavení.
+ * Jinak (lokální vývoj bez Mongo) fallback na JSON soubor ve složce
+ * `DATA_DIR`.
+ *
+ * Upload médií řeší zvlášť Cloudinary (viz níže) – do Mongo by se binárky
+ * neukládaly.
  */
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const UPLOADS = process.env.UPLOADS_DIR || path.join(__dirname, "uploads");
 const DATA = path.join(DATA_DIR, "posts.json");
 const FRONTEND = path.join(__dirname, "..", "frontend");
 const MAX_JSON = "2mb";
+
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  process.env.MONGO_URL ||
+  process.env.MONGO_URI ||
+  process.env.DATABASE_URL ||
+  "";
+const MONGODB_DB = process.env.MONGODB_DB || "romcaom";
+
+let mongo = null; // { client, db, posts, auth } když je DB připojená
+
+async function initMongo() {
+  if (!MONGODB_URI) return null;
+  const client = new MongoClient(MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+  });
+  await client.connect();
+  const db = client.db(MONGODB_DB);
+  const posts = db.collection("posts");
+  const auth = db.collection("auth");
+  try {
+    await posts.createIndex({ slug: 1 }, { unique: true });
+    await posts.createIndex({ createdAt: -1 });
+  } catch (err) {
+    console.warn("[mongo] createIndex warning:", err?.message || err);
+  }
+  return { client, db, posts, auth };
+}
 
 const app = express();
 app.use(express.json({ limit: MAX_JSON }));
@@ -87,7 +119,8 @@ function slugify(s) {
     .replace(/^-|-$/g, "") || "post";
 }
 
-async function readDb() {
+// Soubor pro fallback (lokální dev bez Mongo)
+async function readFileDb() {
   if (!existsSync(DATA)) {
     await mkdir(DATA_DIR, { recursive: true });
     await writeFile(DATA, JSON.stringify({ posts: [] }, null, 2), "utf8");
@@ -96,20 +129,122 @@ async function readDb() {
   return JSON.parse(raw);
 }
 
-async function writeDb(data) {
+async function writeFileDb(data) {
   await writeFile(DATA, JSON.stringify(data, null, 2), "utf8");
 }
 
 /**
- * Admin heslo:
- * - pokud je `${DATA_DIR}/auth.json` s `passwordHash`, používá se ten (dá se
- *   měnit z admina přes `/api/auth/change-password`)
- * - jinak fallback na `ADMIN_PASSWORD_HASH` / `ADMIN_PASSWORD` env (pro úplně
- *   první přihlášení, dokud si uživatel neuloží vlastní heslo)
+ * Post store – abstrahuje Mongo vs. soubor.
+ * Mongo dokument = stejný shape jako položka v `posts.json`.
+ */
+function publicPost(p) {
+  if (!p) return null;
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    subtitle: p.subtitle,
+    category: p.category,
+    bodyHtml: p.bodyHtml,
+    heroImage: p.heroImage,
+    gallery: p.gallery,
+    published: p.published,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
+
+async function listAllPosts() {
+  if (mongo) {
+    return await mongo.posts.find({}).sort({ createdAt: -1 }).toArray();
+  }
+  const db = await readFileDb();
+  return [...(db.posts || [])].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+}
+
+async function findPostBySlug(slug) {
+  if (mongo) {
+    return await mongo.posts.findOne({ slug });
+  }
+  const db = await readFileDb();
+  return (db.posts || []).find((p) => p.slug === slug) || null;
+}
+
+async function findPostById(id) {
+  if (mongo) {
+    return await mongo.posts.findOne({ id });
+  }
+  const db = await readFileDb();
+  return (db.posts || []).find((p) => p.id === id) || null;
+}
+
+async function slugExists(slug, exceptId = null) {
+  if (mongo) {
+    const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
+    const n = await mongo.posts.countDocuments(filter, { limit: 1 });
+    return n > 0;
+  }
+  const db = await readFileDb();
+  return (db.posts || []).some((p) => p.slug === slug && p.id !== exceptId);
+}
+
+async function insertPost(post) {
+  if (mongo) {
+    await mongo.posts.insertOne(post);
+    return;
+  }
+  const db = await readFileDb();
+  db.posts = [post, ...(db.posts || [])];
+  await writeFileDb(db);
+}
+
+async function updatePostById(id, patch) {
+  if (mongo) {
+    const r = await mongo.posts.findOneAndUpdate(
+      { id },
+      { $set: patch },
+      { returnDocument: "after" }
+    );
+    return r?.value || r; // driver verze se liší – oba případy ošetřené
+  }
+  const db = await readFileDb();
+  const idx = (db.posts || []).findIndex((p) => p.id === id);
+  if (idx < 0) return null;
+  const cur = { ...db.posts[idx], ...patch };
+  db.posts[idx] = cur;
+  await writeFileDb(db);
+  return cur;
+}
+
+async function deletePostById(id) {
+  if (mongo) {
+    const r = await mongo.posts.deleteOne({ id });
+    return r.deletedCount > 0;
+  }
+  const db = await readFileDb();
+  const before = (db.posts || []).length;
+  db.posts = (db.posts || []).filter((p) => p.id !== id);
+  if (db.posts.length === before) return false;
+  await writeFileDb(db);
+  return true;
+}
+
+/**
+ * Auth store – heslo uložené v DB (doc `_id: "admin"`) nebo v souboru
+ * (fallback pro lokální dev).
  */
 const AUTH_FILE = path.join(DATA_DIR, "auth.json");
 
-async function readAuthFile() {
+async function readSavedAuth() {
+  if (mongo) {
+    const doc = await mongo.auth.findOne({ _id: "admin" });
+    if (doc && typeof doc.passwordHash === "string" && doc.passwordHash) {
+      return { passwordHash: doc.passwordHash, updatedAt: doc.updatedAt };
+    }
+    return null;
+  }
   if (!existsSync(AUTH_FILE)) return null;
   try {
     const raw = await readFile(AUTH_FILE, "utf8");
@@ -123,7 +258,15 @@ async function readAuthFile() {
   }
 }
 
-async function writeAuthFile(data) {
+async function writeSavedAuth(data) {
+  if (mongo) {
+    await mongo.auth.updateOne(
+      { _id: "admin" },
+      { $set: { passwordHash: data.passwordHash, updatedAt: data.updatedAt } },
+      { upsert: true }
+    );
+    return;
+  }
   await mkdir(DATA_DIR, { recursive: true });
   await writeFile(AUTH_FILE, JSON.stringify(data, null, 2), "utf8");
 }
@@ -137,10 +280,10 @@ function timingSafeStringEqual(a, b) {
 }
 
 async function verifyPassword(plain) {
-  const saved = await readAuthFile();
+  const saved = await readSavedAuth();
   if (saved) {
     const ok = await bcrypt.compare(plain, saved.passwordHash);
-    console.log(`[auth] verify via auth.json → ${ok ? "OK" : "FAIL"}`);
+    console.log(`[auth] verify via saved password (${mongo ? "mongo" : "file"}) → ${ok ? "OK" : "FAIL"}`);
     return ok;
   }
   const hash = process.env.ADMIN_PASSWORD_HASH;
@@ -237,8 +380,14 @@ function uploadBufferToCloudinary(buffer, originalName) {
 
 // --- API ---
 
-app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, hasAuth: !!(process.env.ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD) });
+app.get("/api/health", async (_req, res) => {
+  const savedAuth = await readSavedAuth().catch(() => null);
+  res.json({
+    ok: true,
+    storage: mongo ? "mongodb" : "file",
+    hasSavedPassword: !!savedAuth,
+    hasEnvAuth: !!(process.env.ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD),
+  });
 });
 
 app.post("/api/auth/login", async (req, res) => {
@@ -277,20 +426,17 @@ app.post("/api/auth/change-password", authRequired, async (req, res) => {
   }
   try {
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    await writeAuthFile({ passwordHash, updatedAt: new Date().toISOString() });
-    console.log(`[change-password] saved to ${AUTH_FILE}`);
+    await writeSavedAuth({ passwordHash, updatedAt: new Date().toISOString() });
+    console.log(`[change-password] saved (store: ${mongo ? "mongo" : "file"})`);
     res.json({ ok: true });
   } catch (err) {
-    console.error(`[change-password] write failed at ${AUTH_FILE}:`, err);
+    console.error(`[change-password] write failed (store: ${mongo ? "mongo" : "file"}):`, err);
     res.status(500).json({ error: `Failed to save new password: ${err?.message || err}` });
   }
 });
 
 app.get("/api/posts", async (req, res) => {
-  const db = await readDb();
-  let list = [...(db.posts || [])].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  let list = await listAllPosts();
   const auth = req.headers.authorization;
   if (auth?.startsWith("Bearer ")) {
     try {
@@ -301,27 +447,12 @@ app.get("/api/posts", async (req, res) => {
   } else {
     list = list.filter((p) => p.published);
   }
-  res.json(
-    list.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      subtitle: p.subtitle,
-      category: p.category,
-      bodyHtml: p.bodyHtml,
-      heroImage: p.heroImage,
-      gallery: p.gallery,
-      published: p.published,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-    }))
-  );
+  res.json(list.map(publicPost));
 });
 
 app.get("/api/post/:slug", async (req, res) => {
   const { slug } = req.params;
-  const db = await readDb();
-  const post = (db.posts || []).find((p) => p.slug === slug);
+  const post = await findPostBySlug(slug);
   if (!post) {
     return res.status(404).json({ error: "Not found" });
   }
@@ -336,19 +467,7 @@ app.get("/api/post/:slug", async (req, res) => {
       return res.status(404).json({ error: "Not found" });
     }
   }
-  res.json({
-    id: post.id,
-    slug: post.slug,
-    title: post.title,
-    subtitle: post.subtitle,
-    category: post.category,
-    bodyHtml: post.bodyHtml,
-    heroImage: post.heroImage,
-    gallery: post.gallery,
-    published: post.published,
-    createdAt: post.createdAt,
-    updatedAt: post.updatedAt,
-  });
+  res.json(publicPost(post));
 });
 
 app.post("/api/posts", authRequired, async (req, res) => {
@@ -358,8 +477,7 @@ app.post("/api/posts", authRequired, async (req, res) => {
     return res.status(400).json({ error: "Title required" });
   }
   let slug = (b.slug && String(b.slug).trim()) || slugify(title);
-  const db = await readDb();
-  if ((db.posts || []).some((p) => p.slug === slug)) {
+  if (await slugExists(slug)) {
     slug = `${slug}-${Date.now()}`;
   }
   const id = `p-${randomUUID()}`;
@@ -377,50 +495,57 @@ app.post("/api/posts", authRequired, async (req, res) => {
     createdAt: now,
     updatedAt: now,
   };
-  db.posts = [post, ...(db.posts || [])];
-  await writeDb(db);
-  res.status(201).json(post);
+  try {
+    await insertPost(post);
+  } catch (err) {
+    console.error("[posts] insert failed:", err);
+    return res.status(500).json({ error: `Failed to save post: ${err?.message || err}` });
+  }
+  res.status(201).json(publicPost(post));
 });
 
 app.put("/api/posts/:id", authRequired, async (req, res) => {
   const { id } = req.params;
-  const db = await readDb();
-  const idx = (db.posts || []).findIndex((p) => p.id === id);
-  if (idx < 0) {
+  const cur = await findPostById(id);
+  if (!cur) {
     return res.status(404).json({ error: "Not found" });
   }
-  const cur = db.posts[idx];
   const b = req.body || {};
-  if (b.title != null) cur.title = String(b.title).trim() || cur.title;
-  if (b.subtitle != null) cur.subtitle = String(b.subtitle).trim();
-  if (b.category != null) cur.category = String(b.category).trim() || "Journal";
-  if (b.bodyHtml != null) cur.bodyHtml = b.bodyHtml;
-  if (b.heroImage != null) cur.heroImage = b.heroImage;
-  if (b.gallery != null) cur.gallery = Array.isArray(b.gallery) ? b.gallery.map(String) : [];
-  if (b.published != null) cur.published = !!b.published;
+  const patch = {};
+  if (b.title != null) patch.title = String(b.title).trim() || cur.title;
+  if (b.subtitle != null) patch.subtitle = String(b.subtitle).trim();
+  if (b.category != null) patch.category = String(b.category).trim() || "Journal";
+  if (b.bodyHtml != null) patch.bodyHtml = b.bodyHtml;
+  if (b.heroImage != null) patch.heroImage = b.heroImage;
+  if (b.gallery != null) patch.gallery = Array.isArray(b.gallery) ? b.gallery.map(String) : [];
+  if (b.published != null) patch.published = !!b.published;
   if (b.slug != null) {
     const ns = String(b.slug).trim() || cur.slug;
-    if (ns !== cur.slug && (db.posts || []).some((p) => p.slug === ns && p.id !== id)) {
+    if (ns !== cur.slug && (await slugExists(ns, id))) {
       return res.status(400).json({ error: "Slug already in use" });
     }
-    cur.slug = ns;
+    patch.slug = ns;
   }
-  cur.updatedAt = new Date().toISOString();
-  db.posts[idx] = cur;
-  await writeDb(db);
-  res.json(cur);
+  patch.updatedAt = new Date().toISOString();
+  try {
+    const updated = await updatePostById(id, patch);
+    res.json(publicPost(updated || { ...cur, ...patch }));
+  } catch (err) {
+    console.error("[posts] update failed:", err);
+    res.status(500).json({ error: `Failed to update post: ${err?.message || err}` });
+  }
 });
 
 app.delete("/api/posts/:id", authRequired, async (req, res) => {
   const { id } = req.params;
-  const db = await readDb();
-  const before = (db.posts || []).length;
-  db.posts = (db.posts || []).filter((p) => p.id !== id);
-  if (db.posts.length === before) {
-    return res.status(404).json({ error: "Not found" });
+  try {
+    const ok = await deletePostById(id);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[posts] delete failed:", err);
+    res.status(500).json({ error: `Failed to delete post: ${err?.message || err}` });
   }
-  await writeDb(db);
-  res.json({ ok: true });
 });
 
 app.post("/api/upload", authRequired, upload.single("file"), async (req, res) => {
@@ -482,20 +607,43 @@ app.use((_req, res) => {
 });
 
 const port = Number(process.env.PORT) || 3000;
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
-  console.log(`[storage] posts file: ${DATA}`);
-  console.log(`[storage] auth file: ${AUTH_FILE} (exists: ${existsSync(AUTH_FILE)})`);
+
+async function bootstrap() {
+  if (MONGODB_URI) {
+    try {
+      mongo = await initMongo();
+      console.log(`[storage] posts: MongoDB (db="${MONGODB_DB}", collection="posts")`);
+      console.log(`[storage] auth:  MongoDB (db="${MONGODB_DB}", collection="auth")`);
+      const savedAuth = await readSavedAuth();
+      console.log(`[auth] saved password in DB: ${savedAuth ? "yes" : "no"}`);
+    } catch (err) {
+      console.error("[mongo] connection FAILED, falling back to file storage:", err?.message || err);
+      mongo = null;
+    }
+  }
+  if (!mongo) {
+    console.log(`[storage] posts file: ${DATA}`);
+    console.log(`[storage] auth file:  ${AUTH_FILE} (exists: ${existsSync(AUTH_FILE)})`);
+  }
   console.log(`[storage] media: ${hasCloudinary ? "Cloudinary (CLOUDINARY_URL set)" : `local dir ${UPLOADS}`}`);
   const envAuth = process.env.ADMIN_PASSWORD_HASH ? "ADMIN_PASSWORD_HASH" : (process.env.ADMIN_PASSWORD ? "ADMIN_PASSWORD (plain)" : "none");
-  console.log(`[auth] env credentials: ${envAuth}  |  file credentials: ${existsSync(AUTH_FILE) ? "yes" : "no"}`);
-  if (!existsSync(FRONTEND)) {
-    console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
-  }
-  if (!process.env.JWT_SECRET) {
-    console.warn("Warning: set JWT_SECRET in .env");
-  }
-  if (!process.env.ADMIN_PASSWORD_HASH && !process.env.ADMIN_PASSWORD) {
-    console.warn("Warning: set ADMIN_PASSWORD_HASH (or ADMIN_PASSWORD) for blog admin");
-  }
+  console.log(`[auth] env fallback: ${envAuth}`);
+
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
+    if (!existsSync(FRONTEND)) {
+      console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
+    }
+    if (!process.env.JWT_SECRET) {
+      console.warn("Warning: set JWT_SECRET in .env");
+    }
+    if (!process.env.ADMIN_PASSWORD_HASH && !process.env.ADMIN_PASSWORD && !mongo) {
+      console.warn("Warning: set ADMIN_PASSWORD_HASH (or ADMIN_PASSWORD) for blog admin");
+    }
+  });
+}
+
+bootstrap().catch((err) => {
+  console.error("[bootstrap] fatal:", err);
+  process.exit(1);
 });
