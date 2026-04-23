@@ -156,10 +156,10 @@ section {
   position: relative;
 }
 
-/* Dvě sousední sekce by neměly zdvojovat svislé paddingy — jen spodní
-   padding předchozí sekce vytvoří odsazení */
+/* Dvě sousední sekce by neměly zdvojovat plné svislé paddingy, ale
+   potřebují aspoň menší dýchací prostor nahoře (kvůli nadpisům) */
 section + section {
-  padding-top: 0;
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
 }
 
 section.hero-bleed {
