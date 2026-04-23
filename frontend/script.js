@@ -93,10 +93,7 @@
         `<svg class="nav-lang__svg" viewBox="0 0 60 40" width="24" height="16"><rect width="60" height="20" x="0" y="0" fill="#fff"/><rect width="60" height="20" x="0" y="20" fill="#D7141A"/><path d="M0 0 L30 20 L0 40 Z" fill="#11457E"/></svg></span>CS</span>`;
 
   const nav = (active) => {
-    const isHome = active === "home";
-    const navClass = isHome
-      ? "nav nav--on-hero"
-      : "nav nav--subpage nav--scrolled";
+    const navClass = "nav nav--subpage nav--scrolled";
     return `
     <nav class="${navClass}" id="siteNav" lang="${lang}">
       <div class="nav-inner">
