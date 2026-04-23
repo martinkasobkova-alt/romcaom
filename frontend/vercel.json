@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://romca-om.onrender.com/api/:path*"
+      "destination": "https://romcaom.onrender.com/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://romca-om.onrender.com/uploads/:path*"
+      "destination": "https://romcaom.onrender.com/uploads/:path*"
     },
     { "source": "/blog/:slug", "destination": "/post.html" },
     { "source": "/cs/blog/:slug", "destination": "/cs/post.html" }

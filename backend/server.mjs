@@ -21,37 +21,48 @@ const MAX_JSON = "2mb";
 const app = express();
 app.use(express.json({ limit: MAX_JSON }));
 
+const BUILTIN_CORS_ORIGINS = [
+  "https://romcaom-y4ru.vercel.app",
+  "https://romcaom.vercel.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:8000",
+  "http://127.0.0.1:8000",
+];
 const fromEnv = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
-const localAllow =
-  (process.env.CORS_ALLOW_LOCALHOST || "") === "1"
-    ? [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-      ]
-    : [];
-const corsOrigins = [...new Set([...fromEnv, ...localAllow])];
-if (corsOrigins.length) {
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && corsOrigins.includes(origin)) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
-      res.setHeader("Vary", "Origin");
-    }
-    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-    if (req.method === "OPTIONS") {
-      return res.status(204).end();
-    }
-    next();
-  });
+const corsOrigins = [...new Set([...BUILTIN_CORS_ORIGINS, ...fromEnv])];
+
+function corsAllowsOrigin(o) {
+  if (!o) return false;
+  if (corsOrigins.includes(o)) return true;
+  try {
+    const u = new URL(o);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname;
+    return h === "vercel.app" || h.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
 }
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && corsAllowsOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  next();
+});
 
 function slugify(s) {
   if (!s || typeof s !== "string") return "post";

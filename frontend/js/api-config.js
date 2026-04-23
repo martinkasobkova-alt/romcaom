@@ -1,19 +1,29 @@
 /**
- * Jednotná základní URL pro volání blog API.
- * - Prázdná / nenastaveno = relativní cesty (stejná doména) — vhodné pro:
- *   - lokálně `npm start` (Node servíruje i frontend);
- *   - Vercel s proxy v `vercel.json` na Render (žádosti na `/api/*` jdou stejnou host doménou).
- * - Při volání API přímo z prohlížeče na jinou doménu (např. jen Render) nastavte
- *   před načtením modulů: <script>window.__ROMCA_API_BASE__ = "https://vas-backend.onrender.com";</script>
- *   (bez koncového lomítka) a v Renderu `CORS_ORIGIN` s doménou vašeho Vercelu.
+ * Základní URL pro všechna volání blog API (admin, seznam, článek).
+ * - Na Vercel (*.vercel.app) → produkční backend na Renderu.
+ * - Jinak (typicky `npm start` / jedna doména) → stejný původ jako stránka.
  */
+const RENDER_API_ORIGIN = "https://romcaom.onrender.com";
+
+function computeApiBase() {
+  if (typeof window === "undefined" || !window.location) {
+    return "";
+  }
+  const h = window.location.hostname;
+  if (h === "vercel.app" || h.endsWith(".vercel.app")) {
+    return RENDER_API_ORIGIN.replace(/\/$/, "");
+  }
+  return window.location.origin.replace(/\/$/, "");
+}
+
+/** Sjednocená base URL; na klientu vyhodnocená pri načtení modulu. */
+export const API_BASE_URL = typeof window !== "undefined" ? computeApiBase() : "";
+
 export function getApiBase() {
-  if (typeof globalThis === "undefined") return "";
-  const v = globalThis.__ROMCA_API_BASE__;
-  if (v == null) return "";
-  const s = String(v).trim();
-  if (s === "" || s === "undefined") return "";
-  return s.replace(/\/$/, "");
+  if (typeof window === "undefined" || !window.location) {
+    return "";
+  }
+  return computeApiBase();
 }
 
 export function apiUrl(path) {
