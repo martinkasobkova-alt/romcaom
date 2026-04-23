@@ -81,7 +81,7 @@ body {
 }
 
 body[data-page="home"] {
-  padding-top: 0;
+  padding-top: var(--nav-h);
 }
 
 img {
@@ -164,7 +164,7 @@ section + section {
 
 section.hero-bleed {
   padding: 0;
-  margin-top: calc(var(--nav-h) + 1.25rem);
+  margin-top: 0;
 }
 
 /* === Small square photo mosaics (not large image bands) === */
