@@ -21,15 +21,28 @@ const MAX_JSON = "2mb";
 const app = express();
 app.use(express.json({ limit: MAX_JSON }));
 
-const corsOrigins = (process.env.CORS_ORIGIN || "")
+const fromEnv = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+const localAllow =
+  (process.env.CORS_ALLOW_LOCALHOST || "") === "1"
+    ? [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+      ]
+    : [];
+const corsOrigins = [...new Set([...fromEnv, ...localAllow])];
 if (corsOrigins.length) {
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin && corsOrigins.includes(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Vary", "Origin");
     }
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
@@ -329,8 +342,8 @@ app.use((_req, res) => {
 });
 
 const port = Number(process.env.PORT) || 3000;
-app.listen(port, () => {
-  console.log(`Beyond Limits: http://localhost:${port}`);
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
   if (!existsSync(FRONTEND)) {
     console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
   }

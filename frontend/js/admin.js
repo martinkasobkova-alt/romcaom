@@ -1,3 +1,5 @@
+import { apiUrl } from "./api-config.js";
+
 const TOKEN_KEY = "bl_blog_token";
 
 function getToken() {
@@ -15,8 +17,9 @@ function authHeaders() {
 }
 
 async function api(path, options = {}) {
+  const url = apiUrl(path);
   const h = { ...authHeaders(), ...options.headers };
-  const res = await fetch(path, { ...options, headers: h });
+  const res = await fetch(url, { ...options, headers: h });
   if (res.status === 401) {
     setToken("");
     showLogin();
@@ -207,7 +210,7 @@ fSlug.addEventListener("input", updateViewLink);
 async function uploadFile(file) {
   const fd = new FormData();
   fd.append("file", file);
-  const res = await fetch("/api/upload", { method: "POST", body: fd, headers: authHeaders() });
+  const res = await fetch(apiUrl("/api/upload"), { method: "POST", body: fd, headers: authHeaders() });
   if (res.status === 401) {
     setToken("");
     showLogin();
@@ -240,7 +243,7 @@ el("galleryFiles").addEventListener("change", async (e) => {
   for (const f of files) fd.append("files", f);
   try {
     saveStatus.textContent = "Nahrávám galerii…";
-    const res = await fetch("/api/upload/gallery", { method: "POST", body: fd, headers: authHeaders() });
+    const res = await fetch(apiUrl("/api/upload/gallery"), { method: "POST", body: fd, headers: authHeaders() });
     if (res.status === 401) {
       setToken("");
       showLogin();
@@ -358,7 +361,7 @@ loginForm.addEventListener("submit", async (e) => {
   loginError.style.display = "none";
   const password = el("loginPassword").value;
   try {
-    const r = await fetch("/api/auth/login", {
+    const r = await fetch(apiUrl("/api/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),

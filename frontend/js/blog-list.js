@@ -1,3 +1,5 @@
+import { apiUrl } from "./api-config.js";
+
 function esc(s) {
   return String(s)
     .replace(/&/g, "&amp;")
@@ -54,7 +56,7 @@ async function run() {
   const loadEl = root.querySelector(".blog-loading");
   if (loadEl) loadEl.textContent = loadMsg;
   try {
-    const r = await fetch("/api/posts", { method: "GET" });
+    const r = await fetch(apiUrl("/api/posts"), { method: "GET" });
     if (!r.ok) throw new Error("api");
     const posts = await r.json();
     if (!Array.isArray(posts) || posts.length === 0) {

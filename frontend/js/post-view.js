@@ -1,3 +1,5 @@
+import { apiUrl } from "./api-config.js";
+
 const isCs = document.body.dataset.lang === "cs";
 
 const blogListHref = isCs ? "/cs/blog.html" : "/blog.html";
@@ -143,7 +145,7 @@ if (!shell) {
 } else if (!slug) {
   shell.innerHTML = `<p class="container" style="padding:3rem">${L.missAddr}. <a href="${blogListHref}">${L.blog}</a></p>`;
 } else {
-  fetch(`/api/post/${encodeURIComponent(slug)}`)
+  fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`))
     .then((r) => (r.ok ? r.json() : null))
     .then((post) => {
       if (!post) {

@@ -3,8 +3,7 @@
   "private": true,
   "description": "Monorepo: frontend/ (statický web) + backend/ (Express API)",
   "workspaces": [
-    "backend",
-    "frontend"
+    "backend"
   ],
   "scripts": {
     "start": "npm run start -w beyond-limits-backend",

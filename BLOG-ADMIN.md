@@ -75,7 +75,7 @@ Uložené **HTML** se vykreslí v článku — pište jen z této administrace (
   2. **Rozděleně:** Vercel = statika z `frontend/`, **Render** běží `backend/server.mjs` s `/api/…` a `uploads/`. V `frontend/vercel.json` je **proxy** z `/api/:path*` a `/uploads/:path*` na váš URL na Renderu (příklad `romca-om.onrender.com` — pokud Render ukazuje jinou subdoménu, upravte oba řádky v `frontend/vercel.json` a znovu deploy). Na Renderu nastavte **Root** na `backend` (nebo ekvivalent) a start `npm start`.
   3. Časem přejít na databázi (např. Supabase) a serverless API.
 
-**Když na Vercelu vidíte jen „Not found“ na celé doméně:** v nastavení projektu (Build &amp; Development) dejte **Framework: Other** (ne Next.js), **Root Directory:** složka **`frontend`** (ne kořen monorepa), **Build Command:** `npm run build`, **Output Directory:** prázdné nebo `.` (ne `dist` / `build`, pokud ten složka v repu není). V `frontend/package.json` je `build` skript, který nic nepřepisuje, jen umožní Vercelu deployment dokončit.
+**Když Vercel píše „No entrypoint“ nebo stránka „Not found“:** u projektu musí být **Root Directory = `frontend`** (ne monorepový root). Statika ve `frontend/` záměrně **nemá** vlastní `package.json` (žádný falešný build), aby Vercel nehledal Node entrypoint. **Build Command** u statiky můžete nechat prázdný. Proxy na Render: `frontend/vercel.json` (upravte URL na `onrender.com` podle vaší služby). Na **Renderu** ponechte root repa, `npm install` + `npm start` (viz README „DEPLOY“), nebo jen složka `backend` a tam `node server.mjs` po `npm install` v `backend/`.
 
 Na Vercelu jsou dál **rewrites** z `/blog/:slug` na `post.html` a z `/cs/…` na `cs/post.html` — blogové URL fungují až tehdy, když se nasazená statika vůbec načte.
 

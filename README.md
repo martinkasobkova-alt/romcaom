@@ -40,22 +40,48 @@ All images currently load directly from Romana's existing blog at:
 
 This means images stay in sync with what Romana already manages on WordPress.
 
-## Deploy on Vercel
+## DEPLOY (Vercel frontend + Render backend)
 
-The static site for Vercel lives under **`frontend/`**. Set **Root Directory** to `frontend` in the Vercel project so build picks up `frontend/vercel.json` and the HTML/CSS/JS.
+- **`frontend/`** = čistá statika (HTML/CSS/JS) — Vercel nesmí hledat Node `server.mjs` ani `package.json` s buildy (proto ve `frontend/` není `package.json`).
+- **`backend/server.mjs`** = Express API, data, `uploads/` — Render nebo jiný Node host.
 
-### Via GitHub (recommended)
-1. Push the repo to GitHub
-2. Vercel.com → Add New Project → Import; set **Root Directory** = `frontend`
-3. Framework Preset: "Other" (or leave default with `build` in `package.json` there)
-4. Deploy
+### Vercel (jen statický web)
 
-### Test locally
+1. Připojte GitHub repozitář a u projektu nastavte **Root Directory: `frontend`** (ne kořen monorepa — jinak Vercel prohlíží `package.json` v kořeni a může hledat neexistující entrypoint).
+2. **Framework / Build:** „Other“ / „Other (Static)“. **Build Command** ponechte prázdné, nebo jeden řádek, který nic nedělá (když to UI dovolí) — není třeba `npm run build`.
+3. **Output** / Install: bez výstupní složky mimo `frontend`; stačí, že prohlédnutý kořen deploye je právě `frontend/`.
+4. V **`frontend/vercel.json`**: `cleanUrls`, `rewrites` (blog slugs + **proxy** `/api` a `/uploads` na váš **Render** URL). Oba řádku s `https://…onrender.com` doplňte o **přesnou** URL z Render dashboardu, commitněte, redeploy.
+5. Volitelné: custom doména v nastavení projektu. Po nasazení přidejte tuto doménu do **`CORS_ORIGIN`** na Renderu (včetně `https://`).
+
+### Render (Node backend)
+
+1. New **Web Service** z tohoto repa, branch `main`.
+2. **Root Directory** (Render): buď nechte **prázdné** a použijte příkazy z kořene, nebo nastavte **`backend`** a pak místo níže uvedených použijte v kořeni `backend` přístup; jednodušší je:
+   - **Root Directory:** (prázdno) = celý monorepozitář
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`  
+   (v kořeni `npm start` spouští workspace `backend` — viz `package.json` v rootu)
+3. **Environment** (minimální): `JWT_SECRET`, `ADMIN_PASSWORD_HASH` (nebo pro vývoj `ADMIN_PASSWORD`), volitelně `PORT` (Render dává `PORT` sám).
+4. **CORS** když blog na Vercelu volá API jinou cestou: nastavte `CORS_ORIGIN` na původ vašeho Vercel webu, např. `https://vase-domena.vercel.app` (u více domén víc hodnot oddělujte **čárkou**).
+5. **Lokální prohlížeč mimo stejný port API** (např. jiný port než backend): můžete v `.env` na dev zkusit `CORS_ALLOW_LOCALHOST=1` a seznam původů doplňuje server pro porty 3000, 5173, 8000. Na produkčním Renderu to typicky nenechávejte zapnuté, pokud to nepotřebujete.
+6. Po deploy ověřte `https://VÁŠ-RENDER-SERVICE.onrender.com/api/health` v prohlížeči (`ok: true`).
+
+### Chování API z prohlížeče (shrnutí)
+
+- **Doporučeno:** Nechejte `window.__ROMCA_API_BASE__` **nenastavené**; `frontend/js/api-config.js` volá **relativní** `/api/...`. Na Vercelu tomu odpovídá proxy v `vercel.json` na Render. Admin i blog tedy chodí na stejnou doménu, proxy přepošle na backend.
+- **Alternativa:** Přímé volání Renderu z prohlížeče — v `admin.html` odkomentujte a nastavte `__ROMCA_API_BASE__` na `https://vas-backend.onrender.com` a na Renderu nalaďte `CORS_ORIGIN` na Vercel doménu (proxy v `vercel.json` pak můžete vypnout, pokud vše půjde přímo na API).
+
+### Test čisté statiky lokálně (bez Node API)
+
 ```bash
-cd beyond-limits
+cd frontend
 python3 -m http.server 8000
-# open http://localhost:8000
+# http://localhost:8000 — blog API bez backendu nenačte data
 ```
+
+### Plný web + admin lokálně
+
+V kořeni: `npm install`, `backend/.env`, pak `npm start` → otevřete `http://localhost:3000/admin.html`.
 
 ## Content sources (everything is real, from Romana's blog)
 
