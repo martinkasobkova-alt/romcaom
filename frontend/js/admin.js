@@ -30,6 +30,7 @@ async function api(path, options = {}) {
 
 const loginView = document.getElementById("loginView");
 const editorView = document.getElementById("editorView");
+const changePasswordView = document.getElementById("changePasswordView");
 const loginError = document.getElementById("loginError");
 const loginForm = document.getElementById("loginForm");
 const adminTopActions = document.getElementById("adminTopActions");
@@ -53,17 +54,39 @@ const viewPublic = el("viewPublic");
 function showLogin() {
   loginView.classList.remove("admin-hidden");
   editorView.classList.add("admin-hidden");
+  changePasswordView?.classList.add("admin-hidden");
   adminTopActions.innerHTML = "";
 }
 
 function showEditor() {
   loginView.classList.add("admin-hidden");
+  changePasswordView?.classList.add("admin-hidden");
   editorView.classList.remove("admin-hidden");
-  adminTopActions.innerHTML = `<button type="button" class="admin-btn admin-btn-ghost" id="logoutBtn">Odhlásit</button> <a href="/blog.html" class="admin-btn admin-btn-ghost" style="text-decoration:none">← Blog (veřejnost)</a>`;
+  adminTopActions.innerHTML = `
+    <button type="button" class="admin-btn admin-btn-ghost" id="changePwBtn">Změnit heslo</button>
+    <button type="button" class="admin-btn admin-btn-ghost" id="logoutBtn">Odhlásit</button>
+    <a href="/blog.html" class="admin-btn admin-btn-ghost" style="text-decoration:none">← Blog (veřejnost)</a>`;
   document.getElementById("logoutBtn").addEventListener("click", () => {
     setToken("");
     showLogin();
   });
+  document.getElementById("changePwBtn").addEventListener("click", showChangePassword);
+}
+
+function showChangePassword() {
+  if (!changePasswordView) return;
+  editorView.classList.add("admin-hidden");
+  loginView.classList.add("admin-hidden");
+  changePasswordView.classList.remove("admin-hidden");
+  const err = el("cpError");
+  const ok = el("cpSuccess");
+  if (err) { err.style.display = "none"; err.textContent = ""; }
+  if (ok) ok.style.display = "none";
+  ["cpCurrent", "cpNew", "cpConfirm"].forEach((id) => {
+    const n = el(id);
+    if (n) n.value = "";
+  });
+  el("cpCurrent")?.focus();
 }
 
 function slugify(s) {
@@ -437,6 +460,54 @@ loginForm.addEventListener("submit", async (e) => {
     loginError.textContent = "Připojení k serveru se nezdařilo. Spouštíte `npm start`?";
     loginError.style.display = "block";
   }
+});
+
+const cpForm = document.getElementById("changePasswordForm");
+if (cpForm) {
+  cpForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = el("cpError");
+    const ok = el("cpSuccess");
+    if (err) { err.style.display = "none"; err.textContent = ""; }
+    if (ok) ok.style.display = "none";
+    const currentPassword = el("cpCurrent").value;
+    const newPassword = el("cpNew").value;
+    const confirmPassword = el("cpConfirm").value;
+    if (newPassword !== confirmPassword) {
+      if (err) { err.textContent = "Nová hesla se neshodují."; err.style.display = "block"; }
+      return;
+    }
+    if (newPassword.length < 8) {
+      if (err) { err.textContent = "Nové heslo musí mít aspoň 8 znaků."; err.style.display = "block"; }
+      return;
+    }
+    try {
+      const r = await api("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}));
+        if (err) {
+          err.textContent = data.error || "Změna hesla selhala.";
+          err.style.display = "block";
+        }
+        return;
+      }
+      if (ok) ok.style.display = "block";
+      ["cpCurrent", "cpNew", "cpConfirm"].forEach((id) => {
+        const n = el(id);
+        if (n) n.value = "";
+      });
+    } catch (e2) {
+      if (e2.message === "auth") return;
+      if (err) { err.textContent = "Spojení se serverem selhalo."; err.style.display = "block"; }
+    }
+  });
+}
+document.getElementById("cpCancel")?.addEventListener("click", () => {
+  showEditor();
 });
 
 async function trySession() {

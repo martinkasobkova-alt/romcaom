@@ -28,6 +28,25 @@
       </form>
     </div>
 
+    <div id="changePasswordView" class="admin-login admin-hidden">
+      <h2>Změna hesla</h2>
+      <p class="admin-hint">Zadejte staré heslo a zvolte nové (min. 8 znaků).</p>
+      <p class="admin-error" id="cpError"></p>
+      <p class="admin-hint" id="cpSuccess" style="color: #2e7d32; display:none;">Heslo bylo změněno.</p>
+      <form id="changePasswordForm">
+        <label for="cpCurrent" class="admin-hint" style="display:block; margin-bottom:.35rem">Staré heslo</label>
+        <input type="password" id="cpCurrent" autocomplete="current-password" required />
+        <label for="cpNew" class="admin-hint" style="display:block; margin:.75rem 0 .35rem">Nové heslo</label>
+        <input type="password" id="cpNew" autocomplete="new-password" minlength="8" required />
+        <label for="cpConfirm" class="admin-hint" style="display:block; margin:.75rem 0 .35rem">Nové heslo znovu</label>
+        <input type="password" id="cpConfirm" autocomplete="new-password" minlength="8" required />
+        <div style="margin-top:1rem; display:flex; gap:.5rem; flex-wrap:wrap">
+          <button type="submit">Uložit nové heslo</button>
+          <button type="button" class="admin-btn admin-btn-ghost" id="cpCancel">Zpět</button>
+        </div>
+      </form>
+    </div>
+
     <div id="editorView" class="admin-hidden">
       <div class="admin-panels">
         <aside class="admin-list" aria-label="Seznam článků">

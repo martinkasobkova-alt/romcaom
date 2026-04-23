@@ -100,6 +100,34 @@ async function writeDb(data) {
   await writeFile(DATA, JSON.stringify(data, null, 2), "utf8");
 }
 
+/**
+ * Admin heslo:
+ * - pokud je `${DATA_DIR}/auth.json` s `passwordHash`, používá se ten (dá se
+ *   měnit z admina přes `/api/auth/change-password`)
+ * - jinak fallback na `ADMIN_PASSWORD_HASH` / `ADMIN_PASSWORD` env (pro úplně
+ *   první přihlášení, dokud si uživatel neuloží vlastní heslo)
+ */
+const AUTH_FILE = path.join(DATA_DIR, "auth.json");
+
+async function readAuthFile() {
+  if (!existsSync(AUTH_FILE)) return null;
+  try {
+    const raw = await readFile(AUTH_FILE, "utf8");
+    const data = JSON.parse(raw);
+    if (data && typeof data.passwordHash === "string" && data.passwordHash) {
+      return data;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeAuthFile(data) {
+  await mkdir(DATA_DIR, { recursive: true });
+  await writeFile(AUTH_FILE, JSON.stringify(data, null, 2), "utf8");
+}
+
 function timingSafeStringEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string") return false;
   const A = Buffer.from(a, "utf8");
@@ -109,6 +137,10 @@ function timingSafeStringEqual(a, b) {
 }
 
 async function verifyPassword(plain) {
+  const saved = await readAuthFile();
+  if (saved) {
+    return bcrypt.compare(plain, saved.passwordHash);
+  }
   const hash = process.env.ADMIN_PASSWORD_HASH;
   if (hash) {
     return bcrypt.compare(plain, hash);
@@ -221,6 +253,28 @@ app.post("/api/auth/login", async (req, res) => {
 
 app.get("/api/auth/verify", authRequired, (_req, res) => {
   res.json({ ok: true });
+});
+
+app.post("/api/auth/change-password", authRequired, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (typeof currentPassword !== "string" || !currentPassword) {
+    return res.status(400).json({ error: "Current password required" });
+  }
+  if (typeof newPassword !== "string" || newPassword.length < 8) {
+    return res.status(400).json({ error: "New password must be at least 8 characters" });
+  }
+  const ok = await verifyPassword(currentPassword);
+  if (!ok) {
+    return res.status(401).json({ error: "Current password is incorrect" });
+  }
+  try {
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await writeAuthFile({ passwordHash, updatedAt: new Date().toISOString() });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[change-password] failed:", err);
+    res.status(500).json({ error: "Failed to save new password" });
+  }
 });
 
 app.get("/api/posts", async (req, res) => {
