@@ -1,0 +1,18 @@
+{
+  "name": "beyond-limits-backend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"process.exit(0)\"",
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "hash-password": "node scripts/hash-password.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

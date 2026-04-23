@@ -1,17 +1,17 @@
 # Blog — přihlášení a psaní článků
 
-Na tomto webu je jednoduchá **administrace blogu** (jako pro jednoho autora / správce). Funguje přes **Node.js server**, který ukládá články do souboru `data/posts.json` a nahrávané fotky do `uploads/`.
+Na tomto webu je jednoduchá **administrace blogu** (jako pro jednoho autora / správce). Funguje přes **Node.js server** ve složce `backend/`, který ukládá články do `backend/data/posts.json` a nahrávané fotky do `backend/uploads/`.
 
 ## 1) První spuštění
 
-1. Nainstalujte závislosti (jednou):
+1. Nainstalujte závislosti (jednou, v **kořeni** repozitáře — npm workspaces):
 
    ```bash
    cd cesta/k/projektu
    npm install
    ```
 
-2. Vytvořte soubor **`.env`** (zkopírujte z `.env.example`):
+2. Vytvořte soubor **`backend/.env`** (zkopírujte z `backend/.env.example`):
 
    ```env
    PORT=3000
@@ -65,20 +65,23 @@ Uložené **HTML** se vykreslí v článku — pište jen z této administrace (
 ## 3) Adresy článků
 
 - Seznam: `/blog.html`
-- Konkrétní článek: `/blog/např-welcome` (slug podle toho, co uvidíte v adminu a v `data/posts.json`)
+- Konkrétní článek: `/blog/např-welcome` (slug podle toho, co uvidíte v adminu a v `backend/data/posts.json`)
 
 ## 4) Nasazení na produkci (Vercel atd.)
 
 - **Pouhé nahrání statických HTML na Vercel** nestačí — chybí API a ukládání. Možnosti:
 
-  1. Hostovat tento repozitář na službě, která umí **Node** (Render, Railway, VPS, Node hosting), nebo
-  2. Časem přejít na databázi (např. Supabase) a serverless API — to můžeme doprojektovat, až bude jasné, kde bude weby bydlet.
+  1. **Nejjednodušší:** celý web i Node server na **Render** (nebo jiný Node host) — Vercel vůbec nepotřebujete.
+  2. **Rozděleně:** Vercel = statika z `frontend/`, **Render** běží `backend/server.mjs` s `/api/…` a `uploads/`. V `frontend/vercel.json` je **proxy** z `/api/:path*` a `/uploads/:path*` na váš URL na Renderu (příklad `romca-om.onrender.com` — pokud Render ukazuje jinou subdoménu, upravte oba řádky v `frontend/vercel.json` a znovu deploy). Na Renderu nastavte **Root** na `backend` (nebo ekvivalent) a start `npm start`.
+  3. Časem přejít na databázi (např. Supabase) a serverless API.
 
-Na Vercelu je v `vercel.json` **rewrite** z `/blog/:slug` na `post.html`, aby šablona článku fungovala, ale **data** stejně musí být dostupná z backendu, pokud chcete ukládat z administrace v prohlížeči.
+**Když na Vercelu vidíte jen „Not found“ na celé doméně:** v nastavení projektu (Build &amp; Development) dejte **Framework: Other** (ne Next.js), **Root Directory:** složka **`frontend`** (ne kořen monorepa), **Build Command:** `npm run build`, **Output Directory:** prázdné nebo `.` (ne `dist` / `build`, pokud ten složka v repu není). V `frontend/package.json` je `build` skript, který nic nepřepisuje, jen umožní Vercelu deployment dokončit.
+
+Na Vercelu jsou dál **rewrites** z `/blog/:slug` na `post.html` a z `/cs/…` na `cs/post.html` — blogové URL fungují až tehdy, když se nasazená statika vůbec načte.
 
 ## 5) Zálohování
 
-- Zálohujte: `data/posts.json` a složku `uploads/`.
+- Zálohujte: `backend/data/posts.json` a složku `backend/uploads/`.
 
 ## 6) Odeslání kolegovi
 

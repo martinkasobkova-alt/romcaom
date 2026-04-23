@@ -10,16 +10,35 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { randomUUID } from "crypto";
 
-dotenv.config();
+dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), ".env") });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = __dirname;
-const DATA = path.join(ROOT, "data", "posts.json");
-const UPLOADS = path.join(ROOT, "uploads");
+const DATA = path.join(__dirname, "data", "posts.json");
+const UPLOADS = path.join(__dirname, "uploads");
+const FRONTEND = path.join(__dirname, "..", "frontend");
 const MAX_JSON = "2mb";
 
 const app = express();
 app.use(express.json({ limit: MAX_JSON }));
+
+const corsOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+if (corsOrigins.length) {
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && corsOrigins.includes(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    }
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+    if (req.method === "OPTIONS") {
+      return res.status(204).end();
+    }
+    next();
+  });
+}
 
 function slugify(s) {
   if (!s || typeof s !== "string") return "post";
@@ -33,7 +52,7 @@ function slugify(s) {
 
 async function readDb() {
   if (!existsSync(DATA)) {
-    await mkdir(path.join(ROOT, "data"), { recursive: true });
+    await mkdir(path.join(__dirname, "data"), { recursive: true });
     await writeFile(DATA, JSON.stringify({ posts: [] }, null, 2), "utf8");
   }
   const raw = await readFile(DATA, "utf8");
@@ -289,15 +308,15 @@ app.post("/api/upload/gallery", authRequired, upload.array("files", 12), (req, r
 app.use("/uploads", express.static(UPLOADS));
 
 app.get("/blog/:slug", (_req, res) => {
-  res.sendFile(path.join(ROOT, "post.html"));
+  res.sendFile(path.join(FRONTEND, "post.html"));
 });
 
 app.get("/cs/blog/:slug", (_req, res) => {
-  res.sendFile(path.join(ROOT, "cs", "post.html"));
+  res.sendFile(path.join(FRONTEND, "cs", "post.html"));
 });
 
 app.use(
-  express.static(ROOT, {
+  express.static(FRONTEND, {
     extensions: ["html"],
     index: ["index.html"],
     maxAge: "1h",
@@ -312,6 +331,9 @@ app.use((_req, res) => {
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, () => {
   console.log(`Beyond Limits: http://localhost:${port}`);
+  if (!existsSync(FRONTEND)) {
+    console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
+  }
   if (!process.env.JWT_SECRET) {
     console.warn("Warning: set JWT_SECRET in .env");
   }

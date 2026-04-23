@@ -2,6 +2,8 @@
 
 Static website built from authentic content from anuradha.blog.
 
+**Struktura repa:** `frontend/` = HTML, CSS, JS, `vercel.json` (pro nasazení na Vercel). `backend/` = Node server (`server.mjs`), API, `data/`, `uploads/`. V kořeni spusťte `npm install` a pak `npm start` (Express servíruje i statiku z `frontend/`).
+
 ## Pages
 
 ```
@@ -18,9 +20,9 @@ Static website built from authentic content from anuradha.blog.
 
 ## Blog: admin + API (Node)
 
-1. `npm install` and copy `.env.example` → `.env` (set `JWT_SECRET` and `ADMIN_PASSWORD_HASH` — see `BLOG-ADMIN.md` in Czech).
+1. In the repo **root:** `npm install` and copy `backend/.env.example` → `backend/.env` (set `JWT_SECRET` and `ADMIN_PASSWORD_HASH` — see `BLOG-ADMIN.md` in Czech).
 2. `npm start` → open [http://localhost:3000/admin.html](http://localhost:3000/admin.html) to log in and write posts (title, subtitle, body with bold/italic, hero image, gallery, uploads).
-3. Data is stored in `data/posts.json` and `uploads/`.
+3. Data is stored in `backend/data/posts.json` and `backend/uploads/`.
 
 **Static “python http.server” alone** will not load dynamic posts; you need the Node server (or a future hosted API).
 
@@ -40,10 +42,12 @@ This means images stay in sync with what Romana already manages on WordPress.
 
 ## Deploy on Vercel
 
+The static site for Vercel lives under **`frontend/`**. Set **Root Directory** to `frontend` in the Vercel project so build picks up `frontend/vercel.json` and the HTML/CSS/JS.
+
 ### Via GitHub (recommended)
-1. Push the whole folder to a GitHub repo
-2. Vercel.com → Add New Project → Import from GitHub
-3. Framework Preset: "Other"
+1. Push the repo to GitHub
+2. Vercel.com → Add New Project → Import; set **Root Directory** = `frontend`
+3. Framework Preset: "Other" (or leave default with `build` in `package.json` there)
 4. Deploy
 
 ### Test locally
