@@ -163,8 +163,23 @@ if (!shell) {
         return;
       }
       document.title = `${post.title} | Beyond Limits`;
-      const md = document.getElementById("metaDesc");
-      if (md) md.setAttribute("content", (post.subtitle || post.title).slice(0, 160));
+      const shortDesc = (post.subtitle || post.title || "").toString().slice(0, 160);
+      const setAttr = (id, attr, value) => {
+        const el = document.getElementById(id);
+        if (el && value) el.setAttribute(attr, value);
+      };
+      setAttr("metaDesc", "content", shortDesc);
+      setAttr("ogTitle", "content", `${post.title} | Beyond Limits`);
+      setAttr("ogDesc", "content", shortDesc);
+      setAttr("twTitle", "content", `${post.title} | Beyond Limits`);
+      setAttr("twDesc", "content", shortDesc);
+      const canonicalUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+      setAttr("canonicalLink", "href", canonicalUrl);
+      setAttr("ogUrl", "content", canonicalUrl);
+      if (post.heroImage) {
+        setAttr("ogImage", "content", post.heroImage);
+        setAttr("twImage", "content", post.heroImage);
+      }
       shell.innerHTML = buildHtml(post);
       const pr = document.getElementById("postProse");
       if (pr) {

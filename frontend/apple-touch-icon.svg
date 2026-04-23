@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Beyond Limits">
+  <title>Beyond Limits</title>
+  <rect width="180" height="180" rx="36" ry="36" fill="#e9dff0"/>
+  <path d="M90 26 L99 80 L154 90 L99 100 L90 154 L81 100 L26 90 L81 80 Z" fill="#1e1a24"/>
+  <text x="90" y="168" font-family="'Cormorant Garamond', Georgia, serif" font-size="14" font-style="italic" text-anchor="middle" fill="#1e1a24">Beyond Limits</text>
+</svg>
