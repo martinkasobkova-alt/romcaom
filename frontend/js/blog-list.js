@@ -26,6 +26,7 @@ const offlineMsg = isCs
   : `Cannot reach the blog. Open the site via <code>npm start</code> (see BLOG-ADMIN.md), or read on <a href="https://anuradha.blog" target="_blank" rel="noopener">anuradha.blog</a>.`;
 const singleNotFound = isCs ? "Článek nenalezen." : "Article not found.";
 const backLabel = isCs ? "← Zpět na seznam článků" : "← Back to blog list";
+const moreLabel = isCs ? "Další články" : "More from the blog";
 
 function card(post) {
   const img = post.heroImage || "https://anuradha.blog/wp-content/uploads/2025/07/photo_2025-07-29_15-42-17.jpg";
@@ -117,13 +118,34 @@ async function run() {
 
   if (slug) {
     try {
-      const r = await fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`), { method: "GET" });
-      if (!r.ok) {
+      const [postResp, listResp] = await Promise.all([
+        fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`), { method: "GET" }),
+        fetch(apiUrl("/api/posts"), { method: "GET" }).catch(() => null),
+      ]);
+      if (!postResp.ok) {
         root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${singleNotFound}</p>`;
         return;
       }
-      const post = await r.json();
-      root.innerHTML = singlePost(post);
+      const post = await postResp.json();
+      let moreHtml = "";
+      if (listResp && listResp.ok) {
+        try {
+          const all = await listResp.json();
+          if (Array.isArray(all)) {
+            const others = all.filter((p) => p && p.slug && p.slug !== post.slug).slice(0, 6);
+            if (others.length) {
+              moreHtml = `
+                <section class="blog-more" style="grid-column:1/-1; margin-top:4rem;">
+                  <div class="section-title" style="margin-bottom:1.5rem;">
+                    <h2 style="font-style: italic; text-align:center;">${moreLabel}</h2>
+                  </div>
+                  <div class="blog-grid">${others.map((p) => card(p)).join("")}</div>
+                </section>`;
+            }
+          }
+        } catch {}
+      }
+      root.innerHTML = singlePost(post) + moreHtml;
     } catch {
       root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${offlineMsg}</p>`;
     }
