@@ -15,7 +15,7 @@ function plainFromHtml(h) {
 }
 
 const isCs = document.body.dataset.lang === "cs";
-const blogBase = isCs ? "/cs/blog" : "/blog";
+const blogPagePath = isCs ? "/cs/blog.html" : "/blog.html";
 const readLabel = isCs ? "Přečíst článek →" : "Read post →";
 const loadMsg = isCs ? "Načítám…" : "Loading…";
 const emptyApi = isCs
@@ -24,6 +24,8 @@ const emptyApi = isCs
 const offlineMsg = isCs
   ? `Nedaří se spojit s blogem. Otevřete stránky přes <code>npm start</code> (viz BLOG-ADMIN.md), nebo si přečtěte texty na <a href="https://anuradha.blog" target="_blank" rel="noopener">anuradha.blog</a>.`
   : `Cannot reach the blog. Open the site via <code>npm start</code> (see BLOG-ADMIN.md), or read on <a href="https://anuradha.blog" target="_blank" rel="noopener">anuradha.blog</a>.`;
+const singleNotFound = isCs ? "Článek nenalezen." : "Article not found.";
+const backLabel = isCs ? "← Zpět na seznam článků" : "← Back to blog list";
 
 function card(post) {
   const img = post.heroImage || "https://anuradha.blog/wp-content/uploads/2025/07/photo_2025-07-29_15-42-17.jpg";
@@ -37,7 +39,7 @@ function card(post) {
       })
     : "";
   return `
-  <a href="${blogBase}/${encodeURIComponent(post.slug)}" class="blog-card">
+  <a href="${blogPagePath}?slug=${encodeURIComponent(post.slug)}" class="blog-card">
     <div class="blog-image" style="background-image: url('${esc(img).replace(/'/g, "&#39;")}')"></div>
     <div class="blog-content">
       <div class="blog-meta">${esc(date || "—")} · ${esc(post.category || (isCs ? "Deník" : "Journal"))}</div>
@@ -50,12 +52,58 @@ function card(post) {
 
 const root = document.getElementById("blog-site-list");
 const template = document.getElementById("blog-fallback-cards");
+const selectedSlug = new URLSearchParams(location.search).get("slug") || "";
+
+function singlePost(post) {
+  const date = post.createdAt
+    ? new Date(post.createdAt).toLocaleDateString(isCs ? "cs-CZ" : "en-GB", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
+  const hero = post.heroImage
+    ? `<img src="${esc(post.heroImage)}" alt="" style="width:100%; border-radius:1rem; margin-bottom:1rem;" />`
+    : "";
+  const gallery = Array.isArray(post.gallery) && post.gallery.length
+    ? `<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.75rem; margin-top:1.25rem;">
+        ${post.gallery
+          .map(
+            (u) =>
+              `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(
+                u
+              )}" alt="" style="width:100%; border-radius:.75rem;" /></a>`
+          )
+          .join("")}
+      </div>`
+    : "";
+  return `
+    <article style="grid-column:1/-1; max-width: 820px; margin: 0 auto; padding: 0 .5rem;">
+      <p><a href="${blogPagePath}">${backLabel}</a></p>
+      ${hero}
+      <div class="blog-meta">${esc(date || "—")} · ${esc(post.category || (isCs ? "Deník" : "Journal"))}</div>
+      <h2 style="margin-top:.35rem">${esc(post.title || "")}</h2>
+      ${post.subtitle ? `<p style="opacity:.85">${esc(post.subtitle)}</p>` : ""}
+      <div class="prose">${post.bodyHtml || ""}</div>
+      ${gallery}
+    </article>`;
+}
 
 async function run() {
   if (!root) return;
   const loadEl = root.querySelector(".blog-loading");
   if (loadEl) loadEl.textContent = loadMsg;
   try {
+    if (selectedSlug) {
+      const r = await fetch(apiUrl(`/api/post/${encodeURIComponent(selectedSlug)}`), { method: "GET" });
+      if (!r.ok) {
+        root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${singleNotFound}</p>`;
+        return;
+      }
+      const post = await r.json();
+      root.innerHTML = singlePost(post);
+      return;
+    }
     const r = await fetch(apiUrl("/api/posts"), { method: "GET" });
     if (!r.ok) throw new Error("api");
     const posts = await r.json();

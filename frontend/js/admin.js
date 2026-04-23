@@ -150,7 +150,7 @@ function updateViewLink() {
   }
   const slug = fSlug.value.trim() || (fTitle.value ? slugify(fTitle.value) : "");
   if (slug) {
-    viewPublic.href = `${location.origin}/blog/${encodeURIComponent(slug)}`;
+    viewPublic.href = `${location.origin}/blog.html?slug=${encodeURIComponent(slug)}`;
   } else {
     viewPublic.removeAttribute("href");
   }
