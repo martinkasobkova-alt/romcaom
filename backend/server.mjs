@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import multer from "multer";
 import dotenv from "dotenv";
 import { randomUUID } from "crypto";
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), ".env") });
 
@@ -144,19 +145,29 @@ if (!existsSync(UPLOADS)) {
   await mkdir(UPLOADS, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOADS);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || ".jpg";
-    const name = `${Date.now()}-${randomUUID().slice(0, 8)}${ext}`;
-    cb(null, name);
-  },
-});
+/**
+ * Pokud je v env `CLOUDINARY_URL`, uploady jdou do Cloudinary (globální CDN,
+ * automatická optimalizace obrázků, podporuje i video a audio).
+ *
+ * Jinak se soubory ukládají na lokální / Render disk (`UPLOADS_DIR`).
+ */
+const hasCloudinary = !!process.env.CLOUDINARY_URL;
+if (hasCloudinary) {
+  cloudinary.config({ secure: true });
+}
+
 const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024, files: 12 },
+  storage: hasCloudinary ? multer.memoryStorage() : multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, UPLOADS);
+    },
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname) || ".jpg";
+      const name = `${Date.now()}-${randomUUID().slice(0, 8)}${ext}`;
+      cb(null, name);
+    },
+  }),
+  limits: { fileSize: 100 * 1024 * 1024, files: 12 },
   fileFilter: (_req, file, cb) => {
     const ok =
       /^image\//.test(file.mimetype) ||
@@ -165,6 +176,25 @@ const upload = multer({
     cb(null, ok);
   },
 });
+
+function uploadBufferToCloudinary(buffer, originalName) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "auto",
+        folder: process.env.CLOUDINARY_FOLDER || "romcaom-blog",
+        use_filename: true,
+        unique_filename: true,
+        filename_override: originalName,
+      },
+      (err, result) => {
+        if (err || !result) return reject(err || new Error("Upload failed"));
+        resolve(result);
+      }
+    );
+    stream.end(buffer);
+  });
+}
 
 // --- API ---
 
@@ -330,20 +360,38 @@ app.delete("/api/posts/:id", authRequired, async (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/upload", authRequired, upload.single("file"), (req, res) => {
+app.post("/api/upload", authRequired, upload.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file" });
   }
-  const url = `/uploads/${req.file.filename}`;
-  res.json({ url, filename: req.file.filename });
+  try {
+    if (hasCloudinary) {
+      const result = await uploadBufferToCloudinary(req.file.buffer, req.file.originalname);
+      return res.json({ url: result.secure_url, publicId: result.public_id });
+    }
+    return res.json({ url: `/uploads/${req.file.filename}`, filename: req.file.filename });
+  } catch (err) {
+    console.error("[upload] failed:", err);
+    return res.status(500).json({ error: "Upload failed" });
+  }
 });
 
-app.post("/api/upload/gallery", authRequired, upload.array("files", 12), (req, res) => {
+app.post("/api/upload/gallery", authRequired, upload.array("files", 12), async (req, res) => {
   if (!req.files?.length) {
     return res.status(400).json({ error: "No files" });
   }
-  const urls = req.files.map((f) => `/uploads/${f.filename}`);
-  res.json({ urls });
+  try {
+    if (hasCloudinary) {
+      const results = await Promise.all(
+        req.files.map((f) => uploadBufferToCloudinary(f.buffer, f.originalname))
+      );
+      return res.json({ urls: results.map((r) => r.secure_url) });
+    }
+    return res.json({ urls: req.files.map((f) => `/uploads/${f.filename}`) });
+  } catch (err) {
+    console.error("[upload/gallery] failed:", err);
+    return res.status(500).json({ error: "Upload failed" });
+  }
 });
 
 // Static: uploads, then /blog/* → post.html, then public site
@@ -374,7 +422,7 @@ const port = Number(process.env.PORT) || 3000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
   console.log(`[storage] posts file: ${DATA}`);
-  console.log(`[storage] uploads dir: ${UPLOADS}`);
+  console.log(`[storage] media: ${hasCloudinary ? "Cloudinary (CLOUDINARY_URL set)" : `local dir ${UPLOADS}`}`);
   if (!existsSync(FRONTEND)) {
     console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
   }
