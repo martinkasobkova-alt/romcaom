@@ -10,8 +10,8 @@
       "source": "/uploads/:path*",
       "destination": "https://romcaom.onrender.com/uploads/:path*"
     },
-    { "source": "/blog/:slug", "destination": "/post.html" },
-    { "source": "/cs/blog/:slug", "destination": "/cs/post.html" }
+    { "source": "/blog/:slug", "destination": "/blog.html?slug=:slug" },
+    { "source": "/cs/blog/:slug", "destination": "/cs/blog.html?slug=:slug" }
   ],
   "headers": [
     {
