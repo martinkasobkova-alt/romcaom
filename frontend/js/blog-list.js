@@ -38,8 +38,9 @@ function card(post) {
         day: "numeric",
       })
     : "";
+  const pretty = isCs ? `/cs/blog/${encodeURIComponent(post.slug)}` : `/blog/${encodeURIComponent(post.slug)}`;
   return `
-  <a href="${blogPagePath}?slug=${encodeURIComponent(post.slug)}" class="blog-card">
+  <a href="${pretty}" class="blog-card">
     <div class="blog-image" style="background-image: url('${esc(img).replace(/'/g, "&#39;")}')"></div>
     <div class="blog-content">
       <div class="blog-meta">${esc(date || "—")} · ${esc(post.category || (isCs ? "Deník" : "Journal"))}</div>
@@ -52,7 +53,22 @@ function card(post) {
 
 const root = document.getElementById("blog-site-list");
 const template = document.getElementById("blog-fallback-cards");
-const selectedSlug = new URLSearchParams(location.search).get("slug") || "";
+
+/** Stejná logika jako u detailu: ?slug=… nebo hezká URL /blog/:slug (i když Vercel v URL nechá cestu bez query). */
+function getSelectedSlug() {
+  const q = new URLSearchParams(location.search).get("slug");
+  if (q != null && String(q).trim() !== "") {
+    return decodeURIComponent(String(q).trim());
+  }
+  const p = location.pathname;
+  if (p.startsWith("/cs/blog/")) {
+    return decodeURIComponent(p.replace(/^\/cs\/blog\//, "").split("/")[0] || "");
+  }
+  if (p.startsWith("/blog/")) {
+    return decodeURIComponent(p.replace(/^\/blog\//, "").split("/")[0] || "");
+  }
+  return "";
+}
 
 function singlePost(post) {
   const date = post.createdAt
@@ -91,11 +107,12 @@ function singlePost(post) {
 
 async function run() {
   if (!root) return;
+  const slug = getSelectedSlug();
   const loadEl = root.querySelector(".blog-loading");
   if (loadEl) loadEl.textContent = loadMsg;
   try {
-    if (selectedSlug) {
-      const r = await fetch(apiUrl(`/api/post/${encodeURIComponent(selectedSlug)}`), { method: "GET" });
+    if (slug) {
+      const r = await fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`), { method: "GET" });
       if (!r.ok) {
         root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${singleNotFound}</p>`;
         return;

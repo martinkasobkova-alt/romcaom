@@ -11,7 +11,9 @@
       "destination": "https://romcaom.onrender.com/uploads/:path*"
     },
     { "source": "/blog/:slug", "destination": "/blog.html?slug=:slug" },
-    { "source": "/cs/blog/:slug", "destination": "/cs/blog.html?slug=:slug" }
+    { "source": "/cs/blog/:slug", "destination": "/cs/blog.html?slug=:slug" },
+    { "source": "/blog", "destination": "/blog.html" },
+    { "source": "/cs/blog", "destination": "/cs/blog.html" }
   ],
   "headers": [
     {
