@@ -199,6 +199,33 @@ el("btnImgBody").addEventListener("click", () => {
   el("bodyImgFile").click();
 });
 
+el("btnVideoBody").addEventListener("click", () => {
+  el("bodyVideoFile").click();
+});
+
+el("btnAudioBody").addEventListener("click", () => {
+  el("bodyAudioFile").click();
+});
+
+function insertNodeAtCursor(node) {
+  bodyEditor.focus();
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    const r = sel.getRangeAt(0);
+    r.collapse(false);
+    r.insertNode(node);
+    r.setStartAfter(node);
+    r.setEndAfter(node);
+    sel.removeAllRanges();
+    sel.addRange(r);
+  } else {
+    bodyEditor.appendChild(node);
+  }
+  const br = document.createElement("p");
+  br.innerHTML = "<br>";
+  node.parentNode?.insertBefore(br, node.nextSibling);
+}
+
 fTitle.addEventListener("input", () => {
   if (!currentId) {
     fSlug.value = slugify(fTitle.value);
@@ -263,22 +290,52 @@ el("bodyImgFile").addEventListener("change", async (e) => {
   e.target.value = "";
   if (!f) return;
   try {
+    saveStatus.textContent = "Nahrávám obrázek…";
     const { url } = await uploadFile(f);
-    bodyEditor.focus();
     const img = document.createElement("img");
     img.src = url;
     img.alt = "";
-    const sel = window.getSelection();
-    if (sel.rangeCount) {
-      const r = sel.getRangeAt(0);
-      r.collapse(true);
-      r.insertNode(img);
-      r.collapse(false);
-    } else {
-      bodyEditor.appendChild(img);
-    }
+    insertNodeAtCursor(img);
+    saveStatus.textContent = "";
   } catch {
     saveStatus.textContent = "Obrázek se nepovedlo nahrát.";
+  }
+});
+
+el("bodyVideoFile").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0];
+  e.target.value = "";
+  if (!f) return;
+  try {
+    saveStatus.textContent = "Nahrávám video (může chvíli trvat)…";
+    const { url } = await uploadFile(f);
+    const video = document.createElement("video");
+    video.src = url;
+    video.controls = true;
+    video.setAttribute("playsinline", "");
+    video.style.maxWidth = "100%";
+    insertNodeAtCursor(video);
+    saveStatus.textContent = "";
+  } catch {
+    saveStatus.textContent = "Video se nepovedlo nahrát (max. 50 MB).";
+  }
+});
+
+el("bodyAudioFile").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0];
+  e.target.value = "";
+  if (!f) return;
+  try {
+    saveStatus.textContent = "Nahrávám audio…";
+    const { url } = await uploadFile(f);
+    const audio = document.createElement("audio");
+    audio.src = url;
+    audio.controls = true;
+    audio.style.width = "100%";
+    insertNodeAtCursor(audio);
+    saveStatus.textContent = "";
+  } catch {
+    saveStatus.textContent = "Audio se nepovedlo nahrát (max. 50 MB).";
   }
 });
 

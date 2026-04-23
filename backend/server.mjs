@@ -13,8 +13,20 @@ import { randomUUID } from "crypto";
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), ".env") });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA = path.join(__dirname, "data", "posts.json");
-const UPLOADS = path.join(__dirname, "uploads");
+
+/**
+ * Persistent storage paths.
+ *
+ * Na produkci (Render) je připnutý disk na `/var/data` a env proměnné
+ * `DATA_DIR` + `UPLOADS_DIR` ukazují na tento disk, takže články i nahrané
+ * soubory přežívají redeploye.
+ *
+ * Lokálně (bez env) se používá klasická složka uvnitř repozitáře, aby šlo
+ * v klidu vyvíjet i bez nastavení.
+ */
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
+const UPLOADS = process.env.UPLOADS_DIR || path.join(__dirname, "uploads");
+const DATA = path.join(DATA_DIR, "posts.json");
 const FRONTEND = path.join(__dirname, "..", "frontend");
 const MAX_JSON = "2mb";
 
@@ -76,7 +88,7 @@ function slugify(s) {
 
 async function readDb() {
   if (!existsSync(DATA)) {
-    await mkdir(path.join(__dirname, "data"), { recursive: true });
+    await mkdir(DATA_DIR, { recursive: true });
     await writeFile(DATA, JSON.stringify({ posts: [] }, null, 2), "utf8");
   }
   const raw = await readFile(DATA, "utf8");
@@ -125,6 +137,9 @@ function authRequired(req, res, next) {
   }
 }
 
+if (!existsSync(DATA_DIR)) {
+  await mkdir(DATA_DIR, { recursive: true });
+}
 if (!existsSync(UPLOADS)) {
   await mkdir(UPLOADS, { recursive: true });
 }
@@ -141,9 +156,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage,
-  limits: { fileSize: 6 * 1024 * 1024, files: 12 },
+  limits: { fileSize: 50 * 1024 * 1024, files: 12 },
   fileFilter: (_req, file, cb) => {
-    const ok = /^image\//.test(file.mimetype) || file.mimetype === "image/webp";
+    const ok =
+      /^image\//.test(file.mimetype) ||
+      /^video\//.test(file.mimetype) ||
+      /^audio\//.test(file.mimetype);
     cb(null, ok);
   },
 });
@@ -355,6 +373,8 @@ app.use((_req, res) => {
 const port = Number(process.env.PORT) || 3000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`Beyond Limits: http://0.0.0.0:${port} (e.g. http://localhost:${port})`);
+  console.log(`[storage] posts file: ${DATA}`);
+  console.log(`[storage] uploads dir: ${UPLOADS}`);
   if (!existsSync(FRONTEND)) {
     console.warn(`Warning: frontend folder not found at ${FRONTEND}`);
   }

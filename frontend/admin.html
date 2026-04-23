@@ -75,10 +75,14 @@
               <button type="button" data-cmd="formatBlock" data-val="p" title="Odstavec">P</button>
               <button type="button" data-cmd="formatBlock" data-val="h2" title="Nadpis 2">H2</button>
               <button type="button" id="btnLink" title="Odkaz">Odkaz</button>
-              <button type="button" id="btnImgBody" title="Nahrát obrázek do textu">Obrázek v textu</button>
+              <button type="button" id="btnImgBody" title="Nahrát obrázek do textu">Obrázek</button>
+              <button type="button" id="btnVideoBody" title="Nahrát video do textu">Video</button>
+              <button type="button" id="btnAudioBody" title="Nahrát audio/hlas do textu">Audio</button>
             </div>
             <div id="bodyEditor" class="prose" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true"></div>
             <input type="file" id="bodyImgFile" class="admin-hidden" accept="image/*" />
+            <input type="file" id="bodyVideoFile" class="admin-hidden" accept="video/*" />
+            <input type="file" id="bodyAudioFile" class="admin-hidden" accept="audio/*" />
           </div>
           <div class="admin-row">
             <label class="admin-check">
