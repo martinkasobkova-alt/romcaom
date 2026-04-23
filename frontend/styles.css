@@ -1215,7 +1215,7 @@ html.is-ready .hero-bleed__panel {
 .content-section {
   display: block;
   background: var(--color-cream);
-  padding: 0;
+  padding: clamp(1.5rem, 3vw, 2.75rem) 0;
 }
 
 /* Legacy: do not show large image bands */
