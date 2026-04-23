@@ -156,6 +156,12 @@ section {
   position: relative;
 }
 
+/* Dvě sousední sekce by neměly zdvojovat svislé paddingy — jen spodní
+   padding předchozí sekce vytvoří odsazení */
+section + section {
+  padding-top: 0;
+}
+
 section.hero-bleed {
   padding: 0;
   margin-top: calc(var(--nav-h) + 1.25rem);
