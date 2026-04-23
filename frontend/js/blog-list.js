@@ -38,9 +38,10 @@ function card(post) {
         day: "numeric",
       })
     : "";
-  const pretty = isCs ? `/cs/blog/${encodeURIComponent(post.slug)}` : `/blog/${encodeURIComponent(post.slug)}`;
+  const basePath = isCs ? "/cs/blog" : "/blog";
+  const href = `${basePath}?slug=${encodeURIComponent(post.slug)}`;
   return `
-  <a href="${pretty}" class="blog-card">
+  <a href="${href}" class="blog-card">
     <div class="blog-image" style="background-image: url('${esc(img).replace(/'/g, "&#39;")}')"></div>
     <div class="blog-content">
       <div class="blog-meta">${esc(date || "—")} · ${esc(post.category || (isCs ? "Deník" : "Journal"))}</div>
@@ -54,18 +55,21 @@ function card(post) {
 const root = document.getElementById("blog-site-list");
 const template = document.getElementById("blog-fallback-cards");
 
-/** Stejná logika jako u detailu: ?slug=… nebo hezká URL /blog/:slug (i když Vercel v URL nechá cestu bez query). */
+/**
+ * Slug se podporuje ve dvou podobách:
+ * 1) `?slug=…` (preferováno — funguje i bez rewrite)
+ * 2) `/blog/:slug` / `/cs/blog/:slug` (rewrite ve vercel.json na /blog.html?slug=:slug)
+ */
 function getSelectedSlug() {
-  const q = new URLSearchParams(location.search).get("slug");
-  if (q != null && String(q).trim() !== "") {
-    return decodeURIComponent(String(q).trim());
+  const params = new URLSearchParams(window.location.search);
+  let s = params.get("slug");
+  if (s != null && String(s).trim() !== "") {
+    return decodeURIComponent(String(s).trim());
   }
-  const p = location.pathname;
-  if (p.startsWith("/cs/blog/")) {
-    return decodeURIComponent(p.replace(/^\/cs\/blog\//, "").split("/")[0] || "");
-  }
-  if (p.startsWith("/blog/")) {
-    return decodeURIComponent(p.replace(/^\/blog\//, "").split("/")[0] || "");
+  const path = window.location.pathname || "";
+  const match = path.match(/^\/(?:cs\/)?blog\/([^/]+)\/?$/);
+  if (match && match[1]) {
+    return decodeURIComponent(match[1]);
   }
   return "";
 }
@@ -110,8 +114,9 @@ async function run() {
   const slug = getSelectedSlug();
   const loadEl = root.querySelector(".blog-loading");
   if (loadEl) loadEl.textContent = loadMsg;
-  try {
-    if (slug) {
+
+  if (slug) {
+    try {
       const r = await fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`), { method: "GET" });
       if (!r.ok) {
         root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${singleNotFound}</p>`;
@@ -119,8 +124,13 @@ async function run() {
       }
       const post = await r.json();
       root.innerHTML = singlePost(post);
-      return;
+    } catch {
+      root.innerHTML = `<p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft)">${offlineMsg}</p>`;
     }
+    return;
+  }
+
+  try {
     const r = await fetch(apiUrl("/api/posts"), { method: "GET" });
     if (!r.ok) throw new Error("api");
     const posts = await r.json();
