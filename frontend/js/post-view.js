@@ -1,4 +1,6 @@
 import { apiUrl } from "./api-config.js";
+import { findStaticPost } from "./static-posts.js";
+import { siteQuoteSection } from "./site-quote.js";
 
 const isCs = document.body.dataset.lang === "cs";
 
@@ -97,6 +99,7 @@ function buildHtml(post) {
       ${gallery}
     </div>
   </section>
+  ${siteQuoteSection()}
   <section class="newsletter-inline reveal">
     <div class="container">
       <div class="newsletter-inline-inner">
@@ -149,6 +152,38 @@ if (!shell) {
 } else if (!slug) {
   shell.innerHTML = `<p class="container" style="padding:3rem">${L.missAddr}. <a href="${blogListHref}">${L.blog}</a></p>`;
 } else {
+  const staticHit = findStaticPost(slug);
+
+  function renderPost(post) {
+    document.title = `${post.title} | Beyond Limits`;
+    const shortDesc = (post.subtitle || post.title || "").toString().slice(0, 160);
+    const setAttr = (id, attr, value) => {
+      const el = document.getElementById(id);
+      if (el && value) el.setAttribute(attr, value);
+    };
+    setAttr("metaDesc", "content", shortDesc);
+    setAttr("ogTitle", "content", `${post.title} | Beyond Limits`);
+    setAttr("ogDesc", "content", shortDesc);
+    setAttr("twTitle", "content", `${post.title} | Beyond Limits`);
+    setAttr("twDesc", "content", shortDesc);
+    const canonicalUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    setAttr("canonicalLink", "href", canonicalUrl);
+    setAttr("ogUrl", "content", canonicalUrl);
+    if (post.heroImage) {
+      setAttr("ogImage", "content", post.heroImage);
+      setAttr("twImage", "content", post.heroImage);
+    }
+    shell.innerHTML = buildHtml(post);
+    const pr = document.getElementById("postProse");
+    if (pr) {
+      pr.innerHTML = post.bodyHtml || "<p></p>";
+    }
+    initRevealIn(shell);
+  }
+
+  if (staticHit) {
+    renderPost(staticHit);
+  } else {
   fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`))
     .then((r) => (r.ok ? r.json() : null))
     .then((post) => {
@@ -162,30 +197,7 @@ if (!shell) {
         document.title = (isCs ? "Nenalezeno" : "Not found") + " | Beyond Limits";
         return;
       }
-      document.title = `${post.title} | Beyond Limits`;
-      const shortDesc = (post.subtitle || post.title || "").toString().slice(0, 160);
-      const setAttr = (id, attr, value) => {
-        const el = document.getElementById(id);
-        if (el && value) el.setAttribute(attr, value);
-      };
-      setAttr("metaDesc", "content", shortDesc);
-      setAttr("ogTitle", "content", `${post.title} | Beyond Limits`);
-      setAttr("ogDesc", "content", shortDesc);
-      setAttr("twTitle", "content", `${post.title} | Beyond Limits`);
-      setAttr("twDesc", "content", shortDesc);
-      const canonicalUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
-      setAttr("canonicalLink", "href", canonicalUrl);
-      setAttr("ogUrl", "content", canonicalUrl);
-      if (post.heroImage) {
-        setAttr("ogImage", "content", post.heroImage);
-        setAttr("twImage", "content", post.heroImage);
-      }
-      shell.innerHTML = buildHtml(post);
-      const pr = document.getElementById("postProse");
-      if (pr) {
-        pr.innerHTML = post.bodyHtml || "<p></p>";
-      }
-      initRevealIn(shell);
+      renderPost(post);
     })
     .catch(() => {
       shell.innerHTML = `
@@ -196,4 +208,5 @@ if (!shell) {
         </div>`;
       document.title = (isCs ? "Blog" : "Blog") + " | Beyond Limits";
     });
+  }
 }

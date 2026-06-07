@@ -1,0 +1,26 @@
+/** English blog post — My First Darshan */
+export const FIRST_DARSHAN_BLOG_POST = {
+  id: "p-first-darshan-en",
+  slug: "my-first-darshan",
+  title: "My First Darshan",
+  subtitle: "The moment that changed my life.",
+  category: "Blog",
+  bodyHtml: [
+    "<p>My name is Romana Ezrová / Anuradha Dasi, and I would like to share my first darshan experience, which took place in 2015 at Shree Peetha Nilaya in Springen, a meeting that changed my life forever.</p>",
+    "<p>For a long time, I felt an emptiness inside and yearned for someone who would truly understand me. I was seeking understanding and acceptance, but the relationships I experienced lacked real depth, trust, and stability. They were not relationships where I could truly be myself. At the same time, I felt like I didn't even understand myself. I didn't know how to live my own life, who I truly was, or what I was searching for. This uncertainty weighed on me every day and brought stress. I longed for answers but didn't know where to find them.</p>",
+    "<p>When I first heard about Paramahamsa Vishwananda, I felt that meeting Him could be interesting. I didn't expect anything specific, I just felt drawn to Him. Together with a few other women, we set out on a journey filled with laughter and joyful sharing.</p>",
+    "<p>But destiny had a surprise for us. On the way, our car broke down, and we arrived too late, the darshan had already ended. We were disappointed. But everything turned out beautifully. Guruji decided to hold another darshan the next day, and we were given a second chance.</p>",
+    "<p>When I entered the room, I felt a special energy. The atmosphere was full of anticipation and love. And then came the moment. When I stepped in front of Gurudev, He looked into my eyes and I felt as though He could see straight into my soul. It was as if He knew everything I had ever felt, joy, sorrow, doubt, the longing to be accepted. And above all, He showed me something I had never experienced before, unconditional divine, sweet love!</p>",
+    "<p>It was the moment I realised that true love places no conditions, it doesn't judge, it doesn't measure. It simply is. And Paramahamsa Vishwananda not only teaches this, He lives it. In every glance, every word, every encounter.</p>",
+    "<p>When He asked me where I came from, and I replied \"the Czech Republic,\" I felt an unexpected peace. Suddenly, everything made sense. I was exactly where I was meant to be.</p>",
+    "<p>After the darshan, I left changed. I no longer felt lonely, instead, I felt deep peace and the awareness that I was accepted just as I am. For the first time, I understood that I don't need to seek validation from others, everything I need is already within me.</p>",
+    "<p>Since then, I have been attending darshans regularly. Each one teaches me something new, humility, love, gratitude. Guruji has never judged me. He always guided me to grow and become the best version of myself.</p>",
+    "<p>I am grateful for every new day I now live and for the opportunity to follow the example of a realised Master and teacher such as Paramahamsa Vishwananda.</p>",
+    "<p>Anuradha Dasi</p>",
+  ].join(""),
+  heroImage: "/images/blog-first-darshan.png",
+  published: true,
+  createdAt: "2026-06-20T10:00:00.000Z",
+  updatedAt: "2026-06-20T10:00:00.000Z",
+  lang: "en",
+};

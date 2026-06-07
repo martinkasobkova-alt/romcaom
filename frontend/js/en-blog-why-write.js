@@ -1,0 +1,31 @@
+/** English blog post — Why did I decide to write a blog? */
+export const WHY_WRITE_BLOG_POST = {
+  id: "p-why-write-blog-en",
+  slug: "why-did-i-decide-to-write-a-blog",
+  title: "Why did I decide to write a blog?",
+  subtitle:
+    "Life is a gift. Each of us always has a choice: either destruction, or moving forward.",
+  category: "Blog",
+  bodyHtml: [
+    "<p>You know, life is a gift, a very special one. It is a gift given to us out of grace. Yet for some foolish reason we don't appreciate it as much as we should. We see the world as a place full of anger and suffering, and we have gotten so used to it that we no longer even try to change it. But it doesn't have to be this way. Each of us always has a choice, in every moment. If you are attentive, you know that there is always a choice: either destruction, or moving forward.</p>",
+    "<p>To me, life is a great lesson. We have the chance to see it as a gift and a kind of test from a \"great teacher,\" or as something ordinary and taken for granted, something you can sleep through, drink through, waste on sex or television.</p>",
+    "<p>We have the ability to create in life both pain and suffering, as well as compassion and love. My own experiences have taught me that hurting, destroying, taking, being indifferent and selfish, that is all easy. But to love, to move forward, to care for others and forget about yourself, to forgive, to give, and to create joy, that is much more challenging. And for that we need real courage and strength. The strength of a warrior for love and peace, first within oneself, and then in society and in the whole world.</p>",
+    "<p>To take responsibility for our actions and look our own demons, cowardice, and arrogance in the eye, and deal with them. They can be everyday habits that bind us like chains, or mental programs and uncontrolled thoughts in our mind. Painful emotions we fear, indifference and laziness that feel easier than leaving our comfort zone. They may seem like harmless little things or our daily routines, but their scent is still that of death, and their goal is pain and suffering. Whether it is suffering we cause ourselves, or suffering we cause others, including nature and animals.</p>",
+    "<p>You might live a life full of luxury, but then old age will knock on your door with the final bill, and the invoice for your actions will arrive like an unexpected event. We all feel that there is an order and a law in this world, a law set by life itself. We can call it karma, or divine justice. It's not about being rewarded or punished based on merit, but about the simple truth that every action has its consequence, and nothing happens by accident. The bill comes to everyone, and that is fair. Not as punishment, but as experience.</p>",
+    "<p>And that is why I decided to write this blog: so I can publicly share my life story, my insights, and my values, and invite you to a shared communication and connection for the good of our world. To support each other and learn from our collective life stories.</p>",
+    "<p>Knowledge, truth, and experience are not found in novels or action movies. I love movie superheroes who protect people from injustice and villains, but they are not going to come. A secret beauty will not appear to make you happy, and a fairy-tale win will not fall into your lap. Life has already begun and time is running. Now is the time to live it correctly.</p>",
+    "<p>It only takes one step at a time, each day making a decision that is not selfish but for others. There are so many possibilities to help, groups, projects, communities, you only need to choose. All it takes is to stop listening to the insatiable mind filled with meaningless desires, and step into the heart, where with every beat our life becomes real life, not a wandering through temptations, desires, and pain in superficial and fleeting things, situations, and people.</p>",
+    "<p>None of us is perfect, and we don't have to be! Life in the body is not about achieving perfection of the mind, but about achieving the value of love, true compassion, and the right values for life. Those who accept responsibility for their actions, but also surrender them to the Eternal, to God, who do not cling to them and do not claim them egoistically as their own, have the chance to free themselves internally from everything that pulls them down. But those who choose a foolish life, power and fame, or indifference and ignorance, they will not find inner peace. They act blindly, clinging to their illusions, suffering for them, or creating pain, problems, and destruction for others.</p>",
+    "<p>Everyone has a choice, it is up to us. And believe me, I too fell all the way to the gates of my own hell, but I chose differently. And today I am truly very happy and free. I love my life and the little things in it. Even great fears like the fear of death or the fear of rejection and judgment by others, are like crumbs on the floor, because my life has been fulfilled. Filled with the knowledge of love for God, the wisdom of creation, and the infinite trust between me and God.</p>",
+    "<p>I am ready to accept the new challenges life will prepare for me. I know that the only arms I want to fall into are the arms of unconditional love, the beings of light who are aware of God's presence, and into the arms of God Himself and my Guru.</p>",
+    "<p><em>Just Love.</em></p>",
+    "<p>Om Namo Narayanaya</p>",
+    "<p>With heartfelt gratitude. 💛<br>Romana Anuradha dasi</p>",
+  ].join(""),
+  heroImage: "/images/blog-why-write-lotus.png",
+  gallery: [],
+  published: true,
+  createdAt: "2026-06-07T12:00:00.000Z",
+  updatedAt: "2026-06-07T12:00:00.000Z",
+  lang: "en",
+};

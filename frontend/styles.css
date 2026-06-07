@@ -1,27 +1,58 @@
 /* ============================================
    BEYOND LIMITS — Holistic / editorial v2
-   Reference: soft lavender, cream, full-bleed hero, air & motion
+   Reference: soft rose, cream, full-bleed hero, air & motion
    ============================================ */
 
 :root {
-  /* Spiritual, soft — no loud lime */
-  --color-lavender: #D4C4E8;
-  --color-lavender-mid: #B9A3D4;
-  --color-lavender-light: #EBE3F5;
-  --color-sky: #9BB8D3;
-  --color-sky-light: #C5D4E3;
-  --color-sage: #DDE6D8;
-  --color-sage-deep: #C5D1C2;
-  --color-lime: #D4E8C8;
-  --color-lime-bright: #B8D4A8;
-  --color-cream: #F4EFE8;
-  --color-peach: #E8B8C8;
-  --color-rose: #D9A8C4;
+  /* Spiritual, soft — rose, blush & light blue (trans-inclusive palette) */
+  --color-lavender: #E8B0CC;
+  --color-lavender-mid: #D995B8;
+  --color-lavender-light: #F5D4E4;
+  --color-sky-blue: #B8DCF5;
+  --color-sky-blue-light: #D8ECFA;
+  --color-sky-blue-pale: #EAF4FC;
+  --color-sky: #C8E4F4;
+  --color-sky-light: #DCEEF9;
+  --color-sage: #E8D8EC;
+  --color-sage-deep: #D4C4E8;
+  --color-lime: #E4D0E8;
+  --color-lime-bright: #E8B0CC;
+  --color-cream: #F4F0F4;
+  --color-peach: #F5C4D8;
+  --color-rose: #D995B8;
+
+  --pink-glow: 232, 176, 204;
+  --pink-mid: 217, 149, 184;
+  --blue-glow: 168, 212, 245;
 
   --color-ink: #1E1A24;
   --color-ink-soft: #4A4458;
   --color-white: #FFFFFF;
   --color-hero-overlay: rgba(18, 14, 28, 0.42);
+
+  /* Shared rose + blue surfaces */
+  --surface-rose-blue: linear-gradient(
+    135deg,
+    var(--color-sky-blue-light) 0%,
+    var(--color-lavender-light) 42%,
+    var(--color-lavender) 100%
+  );
+  --surface-blue-rose: linear-gradient(
+    180deg,
+    var(--color-sky-blue-pale) 0%,
+    rgba(245, 212, 228, 0.55) 45%,
+    rgba(232, 176, 204, 0.72) 100%
+  );
+
+  /* Navigation — light blue glass, blends with page hero */
+  --nav-surface: rgba(220, 238, 252, 0.78);
+  --nav-surface-solid: rgba(216, 236, 250, 0.92);
+  --nav-surface-gradient: linear-gradient(
+    180deg,
+    rgba(234, 244, 252, 0.94) 0%,
+    rgba(228, 236, 248, 0.9) 55%,
+    rgba(240, 228, 240, 0.88) 100%
+  );
 
   /* Typography */
   --font-display: "Cormorant Garamond", "Fraunces", Georgia, serif;
@@ -49,12 +80,13 @@
   --photo-shine: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   --photo-edge: 1px solid rgba(255, 255, 255, 0.35);
 
-  /* Inner page hero — glassy, cream-first (matches home body) */
+  /* Inner page hero — cream, light blue & blush */
   --page-hero-surface: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.75) 0%,
-    rgba(244, 239, 232, 0.97) 48%,
-    rgba(200, 218, 198, 0.55) 100%
+    180deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(216, 236, 250, 0.78) 38%,
+    rgba(245, 212, 228, 0.68) 68%,
+    rgba(232, 176, 204, 0.58) 100%
   );
 }
 
@@ -73,7 +105,10 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--color-ink);
-  background: var(--color-cream);
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(var(--blue-glow), 0.14) 0%, transparent 55%),
+    radial-gradient(90% 60% at 0% 100%, rgba(var(--pink-glow), 0.1) 0%, transparent 50%),
+    var(--color-cream);
   line-height: 1.6;
   font-size: 16px;
   overflow-x: hidden;
@@ -224,6 +259,41 @@ section.hero-bleed {
   margin-top: 0;
 }
 
+.partners-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.partners-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(30, 26, 36, 0.07);
+  border-radius: var(--radius-sm);
+}
+
+.partners-list__field {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.partners-list__name {
+  color: var(--color-ink-soft);
+}
+
+.partners-list__name::before {
+  content: "·";
+  margin-right: 0.65rem;
+  color: var(--color-lavender-mid);
+}
+
 .text-panel blockquote {
   font-family: var(--font-display);
   font-style: italic;
@@ -261,9 +331,13 @@ section.hero-bleed {
   box-shadow: 0 2px 14px rgba(30, 26, 36, 0.1);
 }
 
-/* Home “Why” block — two portrait tiles, face-forward crops */
 .text-panel .photo-mosaic--in-panel.photo-mosaic--why-two {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* About / portrait pairs — taller crop, face-forward */
+.text-panel .photo-mosaic--in-panel.photo-mosaic--why-two.photo-mosaic--face-focus .photo-mosaic__cell {
+  aspect-ratio: 4 / 5;
 }
 
 /* Jedna fotka místo více dlaždic (koláž) v textovém panelu */
@@ -314,10 +388,10 @@ section.hero-bleed {
   left: 0;
   right: 0;
   z-index: 200;
-  background: rgba(244, 239, 232, 0.82);
-  backdrop-filter: blur(18px) saturate(1.1);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
-  border-bottom: 1px solid rgba(30, 26, 36, 0.06);
+  background: var(--nav-surface-gradient);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border-bottom: 1px solid rgba(var(--blue-glow), 0.22);
   transition:
     background 0.4s ease,
     border-color 0.4s ease,
@@ -356,9 +430,9 @@ section.hero-bleed {
 
 .nav.nav--scrolled,
 .nav.nav--subpage {
-  background: rgba(244, 239, 232, 0.94) !important;
-  border-bottom: 1px solid rgba(30, 26, 36, 0.08) !important;
-  box-shadow: 0 8px 32px rgba(30, 26, 36, 0.06) !important;
+  background: var(--nav-surface-gradient) !important;
+  border-bottom: 1px solid rgba(var(--blue-glow), 0.28) !important;
+  box-shadow: 0 8px 28px rgba(var(--blue-glow), 0.12), 0 4px 16px rgba(var(--pink-glow), 0.08) !important;
 }
 
 .nav.nav--scrolled .nav-logo-star,
@@ -518,13 +592,15 @@ a.nav-lang__opt:hover {
   flex: 1;
   justify-content: center;
   display: flex;
-  gap: 2rem;
+  gap: 1.1rem;
   list-style: none;
   align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .nav-links a {
-  font-size: 0.93rem;
+  font-size: 0.875rem;
   color: var(--color-ink);
   transition: opacity 0.2s;
   position: relative;
@@ -546,13 +622,13 @@ a.nav-lang__opt:hover {
   right: 0;
   bottom: -6px;
   height: 2px;
-  background: var(--color-lime-bright);
+  background: var(--color-sky-blue);
   border-radius: 2px;
 }
 
 .nav.nav--on-hero:not(.nav--scrolled) .nav-links a.active::after {
-  background: var(--color-lavender-light);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+  background: var(--color-sky-blue-light);
+  box-shadow: 0 0 12px rgba(var(--blue-glow), 0.45);
 }
 
 .nav-cta {
@@ -567,15 +643,15 @@ a.nav-lang__opt:hover {
 
 .nav-cta:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(200, 242, 74, 0.4);
+  box-shadow: 0 6px 18px rgba(var(--pink-glow), 0.45);
 }
 
 /* Blog — viditelné zvýraznění, ne plné CTA jako Kontakt (spíš jemný „badge“) */
 .nav-links a.nav-blog {
   padding: 0.42rem 0.85rem;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(200, 242, 74, 0.5);
-  background: rgba(200, 242, 74, 0.14);
+  border: 1px solid rgba(var(--pink-glow), 0.55);
+  background: rgba(var(--pink-glow), 0.18);
   font-weight: 500;
   transition:
     border-color 0.2s,
@@ -590,8 +666,8 @@ a.nav-lang__opt:hover {
 
 .nav-links a.nav-blog:hover {
   opacity: 1;
-  background: rgba(200, 242, 74, 0.26);
-  border-color: rgba(160, 220, 60, 0.85);
+  background: rgba(var(--pink-glow), 0.32);
+  border-color: rgba(var(--pink-mid), 0.75);
 }
 
 .nav.nav--on-hero:not(.nav--scrolled) .nav-links a.nav-blog {
@@ -617,20 +693,20 @@ a.nav-lang__opt:hover {
 .nav.nav--subpage .nav-links a.nav-blog {
   color: var(--color-ink) !important;
   border-color: rgba(43, 35, 64, 0.2) !important;
-  background: rgba(200, 242, 74, 0.16) !important;
+  background: rgba(var(--pink-glow), 0.2) !important;
 }
 
 .nav.nav--scrolled .nav-links a.nav-blog:hover,
 .nav.nav--subpage .nav-links a.nav-blog:hover {
-  border-color: rgba(90, 120, 30, 0.45) !important;
-  background: rgba(200, 242, 74, 0.3) !important;
+  border-color: rgba(var(--pink-mid), 0.5) !important;
+  background: rgba(var(--pink-glow), 0.34) !important;
 }
 
 .nav.nav--scrolled .nav-links a.nav-blog.active,
 .nav.nav--subpage .nav-links a.nav-blog.active {
   border-color: var(--color-ink) !important;
-  background: rgba(200, 242, 74, 0.34) !important;
-  box-shadow: 0 2px 10px rgba(200, 242, 74, 0.22);
+  background: rgba(var(--pink-glow), 0.38) !important;
+  box-shadow: 0 2px 10px rgba(var(--pink-glow), 0.28);
 }
 
 .nav-burger {
@@ -678,7 +754,7 @@ a.nav-lang__opt:hover {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(200, 242, 74, 0.45);
+  box-shadow: 0 10px 24px rgba(var(--pink-glow), 0.4), 0 6px 18px rgba(var(--blue-glow), 0.28);
 }
 
 .btn-outline {
@@ -973,7 +1049,7 @@ html.is-ready .hero-bleed__panel {
 /* “Why us” — text block only; photo is separate editorial strip above */
 .why-panel {
   display: block;
-  background: linear-gradient(130deg, var(--color-lavender) 0%, #c4b0dc 100%);
+  background: var(--surface-rose-blue);
   color: var(--color-ink);
   padding: clamp(2.5rem, 5vw, 3.5rem) 0;
 }
@@ -1258,11 +1334,16 @@ html.is-ready .hero-bleed__panel {
 }
 
 /* ============================================
-   SECTION: Features (on lime background)
+   SECTION: Features (on rose background)
    ============================================ */
 
 .section-lime {
-  background: linear-gradient(180deg, var(--color-sage) 0%, #cfdcc8 100%);
+  background: linear-gradient(
+    165deg,
+    var(--color-sky-blue-pale) 0%,
+    var(--color-sage) 38%,
+    var(--color-sage-deep) 100%
+  );
   padding: clamp(2.5rem, 5vw, 3.5rem) 0;
   border-top: 1px solid rgba(30, 26, 36, 0.05);
   border-bottom: 1px solid rgba(30, 26, 36, 0.05);
@@ -1326,7 +1407,12 @@ html.is-ready .hero-bleed__panel {
    ============================================ */
 
 .journey {
-  background: var(--color-cream);
+  background: linear-gradient(
+    180deg,
+    var(--color-sky-blue-pale) 0%,
+    var(--color-lavender-light) 42%,
+    var(--color-cream) 100%
+  );
 }
 
 .journey-grid {
@@ -1498,7 +1584,7 @@ html.is-ready .hero-bleed__panel {
 .footer {
   display: flex;
   flex-direction: column;
-  background: var(--color-lavender);
+  background: var(--surface-rose-blue);
   overflow: hidden;
 }
 
@@ -1691,12 +1777,58 @@ html.is-ready .hero-bleed__panel {
   color: var(--color-lime-bright);
 }
 
+.site-quote-bar {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--blue-glow), 0.12) 0%,
+    rgba(255, 255, 255, 0.42) 50%,
+    rgba(var(--pink-glow), 0.1) 100%
+  );
+  padding: clamp(1.35rem, 4vw, 2rem) var(--container-padding);
+  text-align: center;
+  border-top: 1px solid rgba(30, 26, 36, 0.06);
+}
+
+.site-quote-section {
+  background: var(--color-cream);
+  padding: clamp(2rem, 5vw, 3.25rem) 0;
+  text-align: center;
+  border-top: 1px solid rgba(30, 26, 36, 0.05);
+}
+
+.site-quote {
+  max-width: 40rem;
+  margin: 0 auto;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.02rem, 2.3vw, 1.2rem);
+  line-height: 1.65;
+  color: var(--color-ink);
+  border: none;
+  padding: 0;
+}
+
+.site-quote p {
+  margin: 0;
+}
+
+.site-quote cite {
+  display: block;
+  margin-top: 1rem;
+  font-style: normal;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
 /* ============================================
    PAGE HERO (sub-pages)
    ============================================ */
 
 .page-hero {
-  background: var(--color-cream);
+  background: var(--color-lavender-light);
   background-image: var(--page-hero-surface);
   padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4rem);
   text-align: center;
@@ -1706,7 +1838,7 @@ html.is-ready .hero-bleed__panel {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
-/* Soft animated orbs (sage + sky) — livelier but calm */
+/* Soft animated orbs (blush + rose) — livelier but calm */
 .page-hero::after {
   content: "";
   position: absolute;
@@ -1715,9 +1847,10 @@ html.is-ready .hero-bleed__panel {
   left: -20%;
   top: -20%;
   background:
-    radial-gradient(45% 40% at 20% 30%, rgba(180, 212, 168, 0.35) 0%, transparent 70%),
-    radial-gradient(35% 35% at 70% 60%, rgba(197, 212, 227, 0.45) 0%, transparent 65%),
-    radial-gradient(30% 30% at 50% 85%, rgba(185, 163, 212, 0.18) 0%, transparent 60%);
+    radial-gradient(45% 40% at 20% 30%, rgba(var(--pink-glow), 0.34) 0%, transparent 70%),
+    radial-gradient(38% 36% at 78% 28%, rgba(var(--blue-glow), 0.32) 0%, transparent 68%),
+    radial-gradient(35% 35% at 70% 60%, rgba(240, 200, 220, 0.38) 0%, transparent 65%),
+    radial-gradient(30% 30% at 50% 85%, rgba(var(--pink-mid), 0.2) 0%, transparent 60%);
   pointer-events: none;
   animation: pageHeroAurora 22s ease-in-out infinite alternate;
   z-index: 0;
@@ -1745,7 +1878,8 @@ html.is-ready .hero-bleed__panel {
   z-index: 0;
   background:
     radial-gradient(100% 70% at 50% 0%, rgba(255, 255, 255, 0.55) 0%, transparent 55%),
-    radial-gradient(520px 360px at 0% 100%, rgba(155, 184, 211, 0.1) 0%, transparent 70%),
+    radial-gradient(480px 340px at 0% 100%, rgba(var(--blue-glow), 0.16) 0%, transparent 70%),
+    radial-gradient(520px 360px at 100% 100%, rgba(var(--pink-glow), 0.14) 0%, transparent 70%),
     repeating-linear-gradient(
       125deg,
       rgba(255, 255, 255, 0) 0px,
@@ -2178,14 +2312,14 @@ html.is-ready .page-hero .container > * {
   font-family: var(--font-body);
   font-size: 0.98rem;
   color: var(--color-ink);
-  background: var(--color-cream);
+  background: var(--color-lavender-light);
   transition: border-color 0.2s, background 0.2s;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--color-ink);
+  border-color: var(--color-lavender-mid);
   background: var(--color-white);
 }
 
@@ -2194,12 +2328,73 @@ html.is-ready .page-hero .container > * {
   resize: vertical;
 }
 
+.contact-direct {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(43, 35, 64, 0.08);
+  text-align: center;
+}
+
+.contact-direct__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--color-ink);
+  margin-bottom: 0.5rem;
+}
+
+.contact-direct__hint {
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 1.25rem;
+}
+
+.contact-direct__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.contact-direct__phone a {
+  font-size: 1.2rem;
+  color: var(--color-ink);
+  border-bottom: 1.5px solid var(--color-lime-bright);
+  padding-bottom: 2px;
+}
+
+.contact-direct__or {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.contact-direct__email a {
+  font-size: 1.05rem;
+  color: var(--color-ink);
+  border-bottom: 1.5px solid var(--color-lime-bright);
+  padding-bottom: 2px;
+}
+
+.contact-direct__sign {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+  line-height: 1.8;
+}
+
+.contact-direct__sign strong {
+  color: var(--color-ink);
+}
+
 /* ============================================
    NEWSLETTER INLINE
    ============================================ */
 
 .newsletter-inline {
-  background: var(--color-lime);
+  background: var(--surface-rose-blue);
   padding: clamp(3rem, 6vw, 4rem) 0;
 }
 
@@ -2333,7 +2528,9 @@ html.is-ready .page-hero .container > * {
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--color-cream);
+    background: var(--nav-surface-gradient);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     flex-direction: column;
     padding: 1.5rem var(--container-padding);
     gap: 1.25rem;
@@ -2346,14 +2543,14 @@ html.is-ready .page-hero .container > * {
 
   .nav.nav--on-hero .nav-links.open a.nav-blog {
     border-color: rgba(43, 35, 64, 0.18) !important;
-    background: rgba(200, 242, 74, 0.18) !important;
+    background: rgba(var(--pink-glow), 0.22) !important;
     box-shadow: none;
   }
 
   .nav.nav--on-hero .nav-links.open a.nav-blog:hover,
   .nav.nav--on-hero .nav-links.open a.nav-blog.active {
     border-color: rgba(43, 35, 64, 0.28) !important;
-    background: rgba(200, 242, 74, 0.3) !important;
+    background: rgba(var(--pink-glow), 0.36) !important;
   }
 }
 
@@ -2472,8 +2669,8 @@ html.is-ready .page-hero .container > * {
   color: var(--color-ink);
 }
 
-.service-tile:nth-child(1) .service-tile-icon { background: var(--color-lavender); }
-.service-tile:nth-child(2) .service-tile-icon { background: var(--color-sky); }
+.service-tile:nth-child(1) .service-tile-icon { background: var(--color-sky-blue); }
+.service-tile:nth-child(2) .service-tile-icon { background: var(--color-lavender); }
 .service-tile:nth-child(3) .service-tile-icon { background: var(--color-lime); }
 .service-tile:nth-child(4) .service-tile-icon { background: var(--color-rose); }
 
@@ -2567,6 +2764,14 @@ html.is-ready .page-hero .container > * {
   align-self: flex-start;
 }
 
+.pricing-card-note {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  margin-bottom: 1.25rem;
+}
+
 /* ============================================
    E-BOOK CARDS in About
    ============================================ */
@@ -2622,6 +2827,18 @@ html.is-ready .page-hero .container > * {
   margin: 0;
 }
 
+.ebook-cards--rose .ebook-card {
+  background: #F0C4D8;
+}
+
+.ebook-cards--rose .ebook-card:hover {
+  background: var(--color-lavender);
+}
+
+.ebook-cards--rose .ebook-card-flag {
+  color: #8E3D62;
+}
+
 /* ============================================
    BLOG POST (single article)
    ============================================ */
@@ -2642,8 +2859,8 @@ html.is-ready .page-hero .container > * {
   left: -10%;
   top: -10%;
   z-index: 0;
-  background: radial-gradient(50% 45% at 15% 25%, rgba(184, 212, 168, 0.4) 0%, transparent 65%),
-    radial-gradient(40% 40% at 80% 70%, rgba(197, 212, 227, 0.35) 0%, transparent 60%);
+  background: radial-gradient(50% 45% at 15% 25%, rgba(var(--pink-glow), 0.42) 0%, transparent 65%),
+    radial-gradient(40% 40% at 80% 70%, rgba(240, 200, 220, 0.38) 0%, transparent 60%);
   pointer-events: none;
   animation: postHeroDrift 18s ease-in-out infinite alternate;
 }

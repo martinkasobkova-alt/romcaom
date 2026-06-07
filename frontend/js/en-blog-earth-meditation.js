@@ -1,0 +1,37 @@
+/** English blog post — Earth Meditation Movement (with photo gallery) */
+export const EARTH_MEDITATION_BLOG_POST = {
+  id: "p-earth-meditation-en",
+  slug: "earth-meditation-movement",
+  title: "Earth Meditation Movement",
+  subtitle:
+    "Four minutes a day to send gratitude and love back to our Mother Earth.",
+  category: "Blog",
+  bodyHtml: [
+    "<p>I would like to dedicate today's article to the beautiful meditation for Mother Earth and the wonderful Earth Meditation Movement project.</p>",
+    "<p>The first thing that caught my attention is that the meditation is for Mother Earth. And that is because it is our planet, the nature that gave us our bodies. It is our common mother. And yet we forget what an important role this mother plays in our lives and our existence. We live here but we give her so little attention, importance and respect. Earth is extremely loving; for centuries, expecting nothing from us and only giving. And we are like naughty children. Now it's time to change that! Because if the children suffer, then their mother suffers with them. If we are not able to change for the sake of ourselves, then we could change for her, for nature and for the other beings that inhabit the planet with us. It is the gift of the incredible diversity of the five elements that has shaped us. Each of us is a unique and beloved child of our planet. And that is why it is so real and direct to name our planet, Mother Earth. If we allow ourselves to be humble and sensitive, we can experience this beautiful reality and become a loving child of this beautiful Planet Earth.</p>",
+    "<p>Loving and respecting ourselves and the Earth is a complete stepping stone to a state of happiness and joy. Because it is only when we give love that we are fulfilled; it is our nature. It is sad that out of our foolishness we have built such a society and system where we have forgotten our relationship with our Mother Earth. Out of pride and arrogance we have distanced ourselves from her. Now we can see that this is not the best way to live happily on Earth.</p>",
+    "<p>The Earth Meditation Movement is a wonderful project that reminds us that it is absolutely necessary and beautiful to spend at least a few minutes a day with our Earth, our Planet, our Mother, and to send our gratitude and love back to her for all the gifts she offers us. It is only thanks to her that we can build our society. There is not a single thing on this Planet that does not come from her. Everything is created and is constantly offered.</p>",
+    "<p>But it won't go on like this indefinitely. I believe that even Planet Earth has its limits. A relationship is always about mutual support, which is why it is so important to offer love and gratitude back to our Earth too. To give back to her the abundance she gives us!</p>",
+    "<p>Meditation is one of the thousands of ways we can help, and how we can begin to truly love our Earth again; it is also how we can help society find the right values. Support life, love, health, joy, abundance and meditate with us! Four minutes that will warm your heart through the day, because the person who gives, will receive it back. He who loves, is loved. After all, we do not always have to be mindful of scarcity, anger and power… Let us turn our attention to qualities such as respect, reverence, help, hope, goodness and justice. And the first step can be the Earth Meditation.</p>",
+    "<p>Another thing that I am very interested in is the goals of the Earth Meditation Movement. And that is, for example, to teach meditation to children (to teach it to a new generation), to use it at concerts, at family barbecues, at the opening of meetings and gatherings, in companies or schools, before courses or trainings, and other common occasions.</p>",
+    "<p>Actually, I like trying to squeeze those lovely 4 minutes of our time wherever we can. This short meditation helps to naturally place the right values and priorities in a society that is moving towards abundance. It is a small gesture that contains a big message. A message of love, humility, unity, patience and faith, leading to happiness, health and peace.</p>",
+    "<p>The meditation shows us that loving is easy and most importantly, very beautiful. And it can start now and everywhere!</p>",
+    "<p>Another goal of the Earth Meditation Movement is to reach one million practitioners, and to create a worldwide Earth Meditation Movement community to join forces and create unity for change in the world while supporting planet Earth.</p>",
+    "<p>So, let's love our planet, its diversity and love.</p>",
+    "<p>Thank you again and again and I wish you many successful achievements.</p>",
+    "<p>Love,<br>Romana</p>",
+    "<p><a href=\"https://worldmovement.org\" target=\"_blank\" rel=\"noopener\">worldmovement.org</a></p>",
+  ].join(""),
+  heroImage: "/images/blog-earth-movement-2.png",
+  gallery: [
+    "/images/blog-earth-movement-1.png",
+    "/images/blog-earth-movement-3.png",
+    "/images/blog-earth-movement-4.png",
+    "/images/blog-earth-movement-5.png",
+    "/images/blog-earth-movement-6.png",
+  ],
+  published: true,
+  createdAt: "2026-06-10T10:00:00.000Z",
+  updatedAt: "2026-06-10T10:00:00.000Z",
+  lang: "en",
+};

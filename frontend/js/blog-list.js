@@ -1,4 +1,5 @@
 import { apiUrl } from "./api-config.js";
+import { findStaticPost, mergePosts } from "./static-posts.js";
 
 function esc(s) {
   return String(s)
@@ -117,6 +118,11 @@ async function run() {
   if (loadEl) loadEl.textContent = loadMsg;
 
   if (slug) {
+    const staticHit = findStaticPost(slug);
+    if (staticHit) {
+      root.innerHTML = singlePost(staticHit);
+      return;
+    }
     try {
       const [postResp, listResp] = await Promise.all([
         fetch(apiUrl(`/api/post/${encodeURIComponent(slug)}`), { method: "GET" }),
@@ -155,8 +161,8 @@ async function run() {
   try {
     const r = await fetch(apiUrl("/api/posts"), { method: "GET" });
     if (!r.ok) throw new Error("api");
-    const posts = await r.json();
-    if (!Array.isArray(posts) || posts.length === 0) {
+    const posts = mergePosts(await r.json(), isCs);
+    if (!posts.length) {
       root.innerHTML = `
         <p style="grid-column:1/-1; text-align:center; color: var(--color-ink-soft); max-width: 32rem; margin: 0 auto">
           ${emptyApi}
@@ -165,6 +171,11 @@ async function run() {
     }
     root.innerHTML = posts.map((p) => card(p)).join("");
   } catch {
+    const fallback = mergePosts([], isCs);
+    if (fallback.length) {
+      root.innerHTML = fallback.map((p) => card(p)).join("");
+      return;
+    }
     if (template && template.content?.firstElementChild) {
       root.replaceChildren(template.content.firstElementChild.cloneNode(true));
     } else {

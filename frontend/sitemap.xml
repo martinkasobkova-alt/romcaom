@@ -61,6 +61,14 @@
   </url>
 
   <url>
+    <loc>https://romcaom.vercel.app/spolupracuji</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://romcaom.vercel.app/spolupracuji"/>
+    <xhtml:link rel="alternate" hreflang="cs" href="https://romcaom.vercel.app/cs/spolupracuji"/>
+  </url>
+
+  <url>
     <loc>https://romcaom.vercel.app/welcome</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
@@ -108,6 +116,12 @@
     <loc>https://romcaom.vercel.app/cs/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://romcaom.vercel.app/cs/spolupracuji</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
 </urlset>

@@ -11,10 +11,11 @@
     en: {
       home: "Home",
       services: "Services",
-      program: "40-Day Program",
+      program: "40 days",
       about: "About",
       pricing: "Pricing",
       blog: "Blog",
+      collaborators: "Collaborators",
       contact: "Contact",
       footerH: "Let's connect",
       footerBtn: "Write to me",
@@ -26,12 +27,13 @@
     cs: {
       home: "Úvod",
       services: "Služby",
-      program: "Program 40 dní",
+      program: "40 dní",
       about: "O mně",
       pricing: "Ceník",
       blog: "Blog",
+      collaborators: "Spolupracuji",
       contact: "Kontakt",
-      footerH: "Napište si",
+      footerH: "Napište mi",
       footerBtn: "Napište mi",
       footerInfo:
         "Česká republika · online po celém světě<br><strong>E-mail:</strong> beyondlimitscz@gmail.com<br><strong>Původní blog:</strong> ",
@@ -93,7 +95,8 @@
         `<svg class="nav-lang__svg" viewBox="0 0 60 40" width="24" height="16"><rect width="60" height="20" x="0" y="0" fill="#fff"/><rect width="60" height="20" x="0" y="20" fill="#D7141A"/><path d="M0 0 L30 20 L0 40 Z" fill="#11457E"/></svg></span>CS</span>`;
 
   const nav = (active) => {
-    const navClass = "nav nav--subpage nav--scrolled";
+    const navClass =
+      active === "home" ? "nav nav--on-hero" : "nav nav--subpage nav--scrolled";
     return `
     <nav class="${navClass}" id="siteNav" lang="${lang}">
       <div class="nav-inner">
@@ -108,6 +111,7 @@
           <li><a href="${pageHref("program.html")}" class="nav-item-program${active === "program" ? " active" : ""}">${t.program}</a></li>
           <li><a href="${pageHref("about.html")}" ${active === "about" ? ' class="active"' : ""}>${t.about}</a></li>
           <li><a href="${pageHref("pricing.html")}" ${active === "pricing" ? ' class="active"' : ""}>${t.pricing}</a></li>
+          <li><a href="${pageHref("spolupracuji.html")}" ${active === "spolupracuji" ? ' class="active"' : ""}>${t.collaborators}</a></li>
           <li><a href="${pageHref("blog.html")}" class="nav-blog${active === "blog" ? " active" : ""}">${t.blog}</a></li>
           <li><a href="${pageHref("contact.html")}" class="nav-cta">${t.contact}</a></li>
         </ul>
@@ -163,6 +167,12 @@
         </div>
       </div>
     </footer>
+    <div class="site-quote-bar">
+      <blockquote class="site-quote site-quote--footer">
+        <p>❤️ Love is infinite, Love is beyond any limit, and this is who you are, and when you identify yourself with that Love, you become that Love itself. ❤️</p>
+        <cite>Paramahamsa Vishwanada</cite>
+      </blockquote>
+    </div>
     <div class="footer-bottom">
       © ${new Date().getFullYear()} Beyond Limits · Created with love by Romana Anuradha ·
       <a href="${pageHref("contact.html")}">${t.footerBottom}</a>
