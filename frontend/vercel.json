@@ -10,6 +10,8 @@
       "source": "/uploads/:path*",
       "destination": "https://romcaom.onrender.com/uploads/:path*"
     },
+    { "source": "/favicon.ico", "destination": "/favicon.svg" },
+    { "source": "/favicon.png", "destination": "/favicon.svg" },
     { "source": "/cs/blog/:slug", "destination": "/cs/blog?slug=:slug" },
     { "source": "/blog/:slug", "destination": "/blog?slug=:slug" }
   ],
